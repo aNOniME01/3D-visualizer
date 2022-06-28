@@ -24,13 +24,13 @@ namespace _3D_visualizer
             WWidth = canvas.ActualWidth;
         }
 
-        public static void AddLine(float[,] p1, float[,] p2)
+        public static void AddLine(Vector3 p1, Vector3 p2)
         {
             Line line = new Line();
-            line.X1 = p1[0, 0] + WWidth/2;
-            line.Y1 = p1[1, 0] + WHeight / 2;
-            line.X2 = p2[0, 0] + WWidth / 2;
-            line.Y2 = p2[1, 0] + WHeight / 2;
+            line.X1 = p1.X + WWidth/2;
+            line.Y1 = p1.Y + WHeight / 2;
+            line.X2 = p2.X + WWidth / 2;
+            line.Y2 = p2.Y + WHeight / 2;
 
             line.StrokeThickness = 2;
             line.Stroke = Brushes.Black;
@@ -50,15 +50,15 @@ namespace _3D_visualizer
             }
             catch {}
         }
-        public static void AddPoint(float[,] point) 
+        public static void AddPoint(Vector3 point) 
         {
             Rectangle rectangle = new Rectangle();
             rectangle.Height = 5;
             rectangle.Width = 5;
             rectangle.Fill = Brushes.Black;
 
-            Canvas.SetLeft(rectangle, point[0,0] - (rectangle.Height/2) + WWidth/2);
-            Canvas.SetTop(rectangle, point[1,0] - (rectangle.Width / 2) + WHeight/2);
+            Canvas.SetLeft(rectangle, point.X - (rectangle.Height/2) + WWidth/2);
+            Canvas.SetTop(rectangle, point.Y - (rectangle.Width / 2) + WHeight/2);
 
             try
             {
@@ -67,15 +67,15 @@ namespace _3D_visualizer
             catch { }
         }
 
-        public static void AddOriginPoint(float[,] point) 
+        public static void AddOriginPoint(Vector3 point) 
         {
             Rectangle rectangle = new Rectangle();
             rectangle.Height = 5;
             rectangle.Width = 5;
             rectangle.Fill = Brushes.Red;
 
-            Canvas.SetLeft(rectangle, point[0,0] - (rectangle.Height/2) +WWidth/2);
-            Canvas.SetTop(rectangle, point[1,0] - (rectangle.Width / 2)+WHeight/2);
+            Canvas.SetLeft(rectangle, point.X - (rectangle.Height/2) +WWidth/2);
+            Canvas.SetTop(rectangle, point.Y - (rectangle.Width / 2)+WHeight/2);
 
             try
             {

@@ -22,6 +22,9 @@
             <TextBlock Text="X Rotation" HorizontalAlignment="Center"/>
             <Slider x:Name="RotXSlider" Minimum="0" Maximum="360" TickFrequency="1" IsSnapToTickEnabled="True" Value="0" ValueChanged="RotXSlider_ValueChanged"/>
             <TextBlock Text="" x:Name="tester"/>
+            <TextBlock Text="Scale" HorizontalAlignment="Center"/>
+            <Slider x:Name="ScaleSlider" Minimum="0.1" Maximum="100" TickFrequency="0.1" IsSnapToTickEnabled="True" Value="1" ValueChanged="ScaleSlider_ValueChanged"/>
+            <TextBlock Text="" x:Name="scalerText"/>
         </StackPanel>
     </Grid>
 </Window>

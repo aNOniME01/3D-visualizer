@@ -17,21 +17,13 @@ namespace _3D_visualizer
         private static Camera MainCam;
         private static Mesh3D Mesh;
 
-        private static float[,] Perspective;
-        private static float[,] Fov;
-        private static float[,] RotX;
-        private static float[,] RotY;
-        private static float[,] RotZ;
-        private static float[,] Loc;
         public static void Load(string loc)
         {
             IsPerspective = false;
 
-            MainCam = new Camera(0,0,0);
+            MainCam = new Camera(0,0,-10);
 
             Mesh = new Mesh3D(loc);
-
-            LoadMatrixes();
 
             Renderer.AddOriginPoint(ProjectTo2D(Mesh.Origin));
             foreach (var vertex in Mesh.Vertecies)
@@ -43,11 +35,9 @@ namespace _3D_visualizer
                 Renderer.AddLine(ProjectTo2D(Mesh.Vertecies[line[0]]), ProjectTo2D(Mesh.Vertecies[line[1]]));
             }
         }
-        public static void Refresh(string loc, int degree)
+        public static void Refresh(string loc)
         {
             //Mesh = new Mesh3D(loc);
-            Mesh.RotateX(degree);
-            LoadMatrixes();
             Renderer.ClearCanvas();
             Renderer.AddOriginPoint(ProjectTo2D(Mesh.Origin));
             foreach (var vertex in Mesh.Vertecies)
@@ -60,102 +50,27 @@ namespace _3D_visualizer
             }
         }
 
-        private static void LoadMatrixes()
+        private static Vector3 ProjectTo2D(Vector3 point)
         {
-            Fov = new float[,]
-            {
-                {(MainCam.FocalLength * MainCam.ImageRes.X)  / (2* MainCam.SenzorSize.X),MainCam.Skew,0,0 },
-                {0,(MainCam.FocalLength * MainCam.ImageRes.Y) /  (2* MainCam.SenzorSize.Y),0,0},
-                {0,-1,1,0 },
-                {0,0,0,1 }
-            };
-
-            RotX = new float[,]
-            {
-                {1,0,0,0},
-                {0, (float)Math.Cos(Mesh.Rotation.X), -(float)Math.Sin(Mesh.Rotation.X),0 },
-                {0,(float)Math.Sin(Mesh.Rotation.X),(float)Math.Cos(Mesh.Rotation.X),0 },
-                {0,0,0,1 }
-            };
-
-            RotY = new float[,]
-            {
-                {(float)Math.Cos(Mesh.Rotation.Y), -(float)Math.Sin(Mesh.Rotation.Y),0,0},
-                {0,1,0,0},
-                {-(float)Math.Sin(Mesh.Rotation.Y),(float)Math.Cos(Mesh.Rotation.Y),1,0 },
-                {0,0,0,1}
-            };
-
-            RotZ = new float[,]
-            {
-                {(float)Math.Cos(Mesh.Rotation.Z), -(float)Math.Sin(Mesh.Rotation.Z),0,0 },
-                {(float)Math.Sin(Mesh.Rotation.Z),(float)Math.Cos(Mesh.Rotation.Z),0,0},
-                {0,0,1,0 },
-                {0,0,0,1 }
-            };
-
-            Loc = new float[,]
-            {
-                {1,0,0,-MainCam.Location.X},
-                {0,1,0,-MainCam.Location.Y},
-                {0,0,1,-MainCam.Location.Z},
-                {0,0,0,1 }
-            };
-        }
-
-        private static float[,] ProjectTo2D(float[,] point)
-        {
-            float[,] projectionMatrix = MultiplyMatrix(MultiplyMatrix(MultiplyMatrix(MultiplyMatrix(MultiplyMatrix(Fov, RotX), RotY), RotZ),Loc), point);
-            if (IsPerspective)
-            {
-                Perspective = new float[,]
-                {
-                    {1/point[2,0],0,0,0},
-                    {0,1/point[2,0],0,0 },
-                    {0,0,1,0 },
-                    {0,0,0,1 }
-                };
-
-                projectionMatrix = MultiplyMatrix(Perspective, projectionMatrix);
-            }
-            //float[,] projectionMatrix = MultiplyMatrix(Fov, RotX);
-            //projectionMatrix = MultiplyMatrix(projectionMatrix, RotY);
-            //projectionMatrix = MultiplyMatrix(projectionMatrix, RotZ);
-            //projectionMatrix = MultiplyMatrix(projectionMatrix, Loc);
-            //projectionMatrix = MultiplyMatrix(projectionMatrix, point);
-            return projectionMatrix;
-        }
-
-        public static float[,] MultiplyMatrix(float[,] A, float[,] B)
-        {
-            int rA = A.GetLength(0);
-            int cA = A.GetLength(1);
-            int rB = B.GetLength(0);
-            int cB = B.GetLength(1);
-            float temp;
-            float[,]? kHasil = null;
-            if (cA == rB)
-            {
-                kHasil = new float[rA, cB];
-                for (int i = 0; i < rA; i++)
-                {
-                    for (int j = 0; j < cB; j++)
-                    {
-                        temp = 0;
-                        for (int k = 0; k < cA; k++)
-                        {
-                            temp += A[i, k] * B[k, j];
-                        }
-                        kHasil[i, j] = temp;
-                    }
-                }
-            }
-            return kHasil;
+            float F = point.Z - MainCam.Location.Z;
+            return new Vector3((point.X - MainCam.Location.X) * (F/point.Z) + MainCam.Location.X,
+                                (point.Y - MainCam.Location.Y) * (F/ point.Z) + MainCam.Location.Y,
+                                point.Z);
         }
 
         public static void PerspectiveTo(bool isPerspective)
         { 
             IsPerspective = isPerspective;
+        }
+
+        public static void ScaleMesh(float scale)
+        {
+            Mesh.ScaleMesh(scale, scale, scale);
+        }
+
+        public static void RotateMesh(int degree)
+        {
+            Mesh.RotateX(degree);
         }
 
     }

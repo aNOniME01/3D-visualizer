@@ -33,20 +33,40 @@ namespace _3D_visualizer
 
         private void RotXSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
-            Logics.Refresh("test.txt", (int)RotXSlider.Value);
-            tester.Text = $"{RotXSlider.Value}";
+            if (IsLoaded == true)
+            {
+                tester.Text = $"{RotXSlider.Value}";
+                Logics.RotateMesh((int)RotXSlider.Value);
+                Logics.Refresh("test.txt");
+            }
         }
 
         private void persp_Checked(object sender, RoutedEventArgs e)
         {
-            Logics.PerspectiveTo(true);
-            Logics.Refresh("test.txt", (int)RotXSlider.Value);
+            if (IsLoaded == true)
+            {
+                Logics.PerspectiveTo(true);
+                Logics.Refresh("test.txt");
+            }
         }
 
         private void CheckBox_Unchecked(object sender, RoutedEventArgs e)
         {
-            Logics.PerspectiveTo(false);
-            Logics.Refresh("test.txt", (int)RotXSlider.Value);
+            if (IsLoaded == true)
+            {
+                Logics.PerspectiveTo(false);
+                Logics.Refresh("test.txt");
+            }
+        }
+
+        private void ScaleSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            if (IsLoaded == true)
+            {
+                tester.Text = $"{ScaleSlider}";
+                Logics.ScaleMesh((float)ScaleSlider.Value);
+                Logics.Refresh("test.txt");
+            }
         }
     }
 }
