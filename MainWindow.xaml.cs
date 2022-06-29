@@ -36,8 +36,8 @@ namespace _3D_visualizer
             if (IsLoaded == true)
             {
                 tester.Text = $"{RotXSlider.Value}";
-                Logics.RotateMesh((int)RotXSlider.Value);
-                Logics.Refresh("test.txt");
+                Logics.RotateMesh(0,0, (int)RotXSlider.Value);
+                Logics.Refresh();
             }
         }
 
@@ -46,7 +46,7 @@ namespace _3D_visualizer
             if (IsLoaded == true)
             {
                 Logics.PerspectiveTo(true);
-                Logics.Refresh("test.txt");
+                Logics.Refresh();
             }
         }
 
@@ -55,7 +55,7 @@ namespace _3D_visualizer
             if (IsLoaded == true)
             {
                 Logics.PerspectiveTo(false);
-                Logics.Refresh("test.txt");
+                Logics.Refresh();
             }
         }
 
@@ -63,9 +63,9 @@ namespace _3D_visualizer
         {
             if (IsLoaded == true)
             {
-                tester.Text = $"{ScaleSlider}";
+                scalerText.Text = $"{ScaleSlider.Value}";
                 Logics.ScaleMesh((float)ScaleSlider.Value);
-                Logics.Refresh("test.txt");
+                Logics.Refresh();
             }
         }
     }

@@ -21,41 +21,35 @@ namespace _3D_visualizer
         {
             IsPerspective = false;
 
-            MainCam = new Camera(0,0,-10);
+            MainCam = new Camera(-10, 0,0);
 
             Mesh = new Mesh3D(loc);
 
-            Renderer.AddOriginPoint(ProjectTo2D(Mesh.Origin));
-            foreach (var vertex in Mesh.Vertecies)
-            {
-                Renderer.AddPoint(ProjectTo2D(vertex));
-            }
-            foreach (var line in Mesh.Lines)
-            {
-                Renderer.AddLine(ProjectTo2D(Mesh.Vertecies[line[0]]), ProjectTo2D(Mesh.Vertecies[line[1]]));
-            }
+            ScaleMesh(1);
+
+            Refresh();
         }
-        public static void Refresh(string loc)
+        public static void Refresh()
         {
-            //Mesh = new Mesh3D(loc);
             Renderer.ClearCanvas();
-            Renderer.AddOriginPoint(ProjectTo2D(Mesh.Origin));
             foreach (var vertex in Mesh.Vertecies)
             {
-                Renderer.AddPoint(ProjectTo2D(vertex));
+                Renderer.AddPoint(vertex);
             }
             foreach (var line in Mesh.Lines)
             {
-                Renderer.AddLine(ProjectTo2D(Mesh.Vertecies[line[0]]), ProjectTo2D(Mesh.Vertecies[line[1]]));
+                Renderer.AddLine(ProjectTo2D(Mesh.Vertecies[line[0]].Vertex), ProjectTo2D(Mesh.Vertecies[line[1]].Vertex));
             }
+            Renderer.AddOriginPoint(ProjectTo2D(Mesh.Origin));
         }
 
-        private static Vector3 ProjectTo2D(Vector3 point)
+        public static Vector3 ProjectTo2D(Vector3 point)
         {
-            float F = point.Z - MainCam.Location.Z;
-            return new Vector3((point.X - MainCam.Location.X) * (F/point.Z) + MainCam.Location.X,
-                                (point.Y - MainCam.Location.Y) * (F/ point.Z) + MainCam.Location.Y,
-                                point.Z);
+            float F = point.X - MainCam.Location.X;
+            if (point.X == 0 && point.Y == 0 && point.Z == 0) return point;
+            return new Vector3(point.X,
+                                (point.Y - MainCam.Location.Y) * (F/ point.X),
+                                (point.Z - MainCam.Location.X) * (F / point.X));
         }
 
         public static void PerspectiveTo(bool isPerspective)
@@ -65,12 +59,13 @@ namespace _3D_visualizer
 
         public static void ScaleMesh(float scale)
         {
-            Mesh.ScaleMesh(scale, scale, scale);
+            Mesh.SetScale(scale, scale, scale);
         }
 
-        public static void RotateMesh(int degree)
+        public static void RotateMesh(float x,float y, float z)
         {
-            Mesh.RotateX(degree);
+            Mesh.Rotate(x,y,z);
+            Refresh();
         }
 
     }

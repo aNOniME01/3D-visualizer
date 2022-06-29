@@ -17,13 +17,17 @@
         <StackPanel Grid.Column="1">
             <StackPanel Orientation="Horizontal">
                 <CheckBox Checked="persp_Checked" Unchecked="CheckBox_Unchecked"/>
+                <TextBlock Text="show vertex info" Margin="10,0,0,0"/>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal">
+                <CheckBox Checked="persp_Checked" Unchecked="CheckBox_Unchecked"/>
                 <TextBlock Text="Perspective" Margin="10,0,0,0"/>
             </StackPanel>
             <TextBlock Text="X Rotation" HorizontalAlignment="Center"/>
             <Slider x:Name="RotXSlider" Minimum="0" Maximum="360" TickFrequency="1" IsSnapToTickEnabled="True" Value="0" ValueChanged="RotXSlider_ValueChanged"/>
             <TextBlock Text="" x:Name="tester"/>
             <TextBlock Text="Scale" HorizontalAlignment="Center"/>
-            <Slider x:Name="ScaleSlider" Minimum="0.1" Maximum="100" TickFrequency="0.1" IsSnapToTickEnabled="True" Value="1" ValueChanged="ScaleSlider_ValueChanged"/>
+            <Slider x:Name="ScaleSlider" Minimum="0.1" Maximum="100" TickFrequency="0.1" IsSnapToTickEnabled="True" Value="0" ValueChanged="ScaleSlider_ValueChanged"/>
             <TextBlock Text="" x:Name="scalerText"/>
         </StackPanel>
     </Grid>

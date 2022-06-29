@@ -11,16 +11,14 @@ namespace _3D_visualizer
     internal class Mesh3D
     {
         public Vector3 Origin { get; private set; }
-        public List<Vector3> DefVertecies { get; private set; }
-        public List<Vector3> Vertecies { get; private set; }
+        public List<Point3D> Vertecies { get; private set; }
+        public List<int[]> Lines { get; private set; }
         public Vector3 Rotation { get; private set; }
         public Vector3 Scale { get; private set; }
-        public List<int[]> Lines { get; private set; }
 
         public Mesh3D(string loc)
         {
-            DefVertecies = new List<Vector3>();
-            Vertecies = new List<Vector3>();
+            Vertecies = new List<Point3D>();
             Lines = new List<int[]>();
 
             Rotation = new Vector3(0, 0, 0);
@@ -42,7 +40,7 @@ namespace _3D_visualizer
                     else if (hlpr[0][0] == 'P')
                     {
                         hlpr[0] = hlpr[0].Trim('P');
-                        DefVertecies.Add( new Vector3(Convert.ToInt32(hlpr[0]), Convert.ToInt32(hlpr[1]), Convert.ToInt32(hlpr[2])));
+                        Vertecies.Add(new Point3D(Convert.ToInt32(hlpr[0]), Convert.ToInt32(hlpr[1]), Convert.ToInt32(hlpr[2]),Origin));
                     }
                     else if (hlpr[0][0] == 'L')
                     {
@@ -52,24 +50,44 @@ namespace _3D_visualizer
                 }
             }
 
-            for (int i = 0; i < DefVertecies.Count; i++)
-            {
-                Vertecies.Add(new Vector3(DefVertecies[i].X, DefVertecies[i].Y, DefVertecies[i].Z));
-            }
         }
-        private float DistanceBetween(Vector2 p1, Vector2 p2) => (float) Math.Sqrt(Math.Pow(p1.X - p2.X,2) * Math.Pow(p1.X - p2.X,2));
-        public void RotateX(int degree)
+        private float DistanceBetween(Vector3 p1, Vector3 p2) => (float) Math.Sqrt(Math.Pow(p2.X - p1.X,2) + Math.Pow(p2.Y - p1.Y,2) + Math.Pow(p2.Z - p1.Z,2));
+        public void Rotate(float x, float y, float z)
         {
-            Rotation = new Vector3(degree,Rotation.Y,Rotation.Z);
+            Rotation = new Vector3(x,y,z);
+
+            foreach (var vertex in Vertecies)
+            {
+                vertex.ChangeRotation(Rotation,Origin);
+            }
         }
 
-        public void ScaleMesh(float x ,float y,float z)
+        public void SetScale(float x, float y, float z)
         {
-            Scale = new Vector3(x,y,z);
+            Scale = new Vector3(x, y, z);
+            ScaleMesh();
+        }
+
+        private void ScaleMesh()
+        {
+
             for (int i = 0; i < Vertecies.Count; i++)
             {
-                Vertecies[i] = new Vector3(DefVertecies[i].X * Scale.X, DefVertecies[i].Y * Scale.Y, DefVertecies[i].Z * Scale.Z);
+                float distance = DistanceBetween(Origin, Vertecies[i].DefVertex);
+                float xScale, yScale, zScale;
+
+                if (Vertecies[i].DefVertex.X < Origin.X) xScale = -(distance * Scale.X);
+                else xScale = (distance * Scale.X);
+
+                if (Vertecies[i].DefVertex.Y < Origin.Y) yScale = -(distance * Scale.Y);
+                else yScale = (distance * Scale.Y);
+
+                if (Vertecies[i].DefVertex.Z < Origin.Z) zScale = -(distance * Scale.Z);
+                else zScale = (distance * Scale.Z);
+
+                Vertecies[i].ChangeLocation(new Vector3(Vertecies[i].DefVertex.X + xScale, Vertecies[i].DefVertex.Y + yScale, Vertecies[i].DefVertex.Z + zScale));
             }
+
         }
 
     }
