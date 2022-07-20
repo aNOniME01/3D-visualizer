@@ -4,19 +4,19 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:_3D_visualizer"
-        mc:Ignorable="d" Loaded="Window_Loaded"
-        Title="MainWindow" Height="450" Width="800">
+        mc:Ignorable="d" Loaded="Window_Loaded" SizeChanged="Window_SizeChanged"
+        Title="MainWindow" Height="450" Width="800" >
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition />
             <ColumnDefinition Width="150"/>
         </Grid.ColumnDefinitions>
         
-        <Canvas x:Name="canvas"  Grid.Column="0"/>
+        <Canvas x:Name="canvas"  Grid.Column="0" Background="Black"/>
 
         <StackPanel Grid.Column="1">
             <StackPanel Orientation="Horizontal">
-                <CheckBox Checked="persp_Checked" Unchecked="CheckBox_Unchecked"/>
+                <CheckBox Checked="CheckBox_Checked"  Unchecked="CheckBox_Unchecked_1"/>
                 <TextBlock Text="show vertex info" Margin="10,0,0,0"/>
             </StackPanel>
             <StackPanel Orientation="Horizontal">
@@ -25,9 +25,15 @@
             </StackPanel>
             <TextBlock Text="X Rotation" HorizontalAlignment="Center"/>
             <Slider x:Name="RotXSlider" Minimum="0" Maximum="360" TickFrequency="1" IsSnapToTickEnabled="True" Value="0" ValueChanged="RotXSlider_ValueChanged"/>
-            <TextBlock Text="" x:Name="tester"/>
+            <TextBlock Text="" x:Name="Xrot"/>
+            <TextBlock Text="Y Rotation" HorizontalAlignment="Center"/>
+            <Slider x:Name="RotYSlider" Minimum="0" Maximum="360" TickFrequency="1" IsSnapToTickEnabled="True" Value="0" ValueChanged="RotYSlider_ValueChanged"/>
+            <TextBlock Text="" x:Name="Yrot"/>
+            <TextBlock Text="Z Rotation" HorizontalAlignment="Center"/>
+            <Slider x:Name="RotZSlider" Minimum="0" Maximum="360" TickFrequency="1" IsSnapToTickEnabled="True" Value="0" ValueChanged="RotZSlider_ValueChanged"/>
+            <TextBlock Text="" x:Name="Zrot"/>
             <TextBlock Text="Scale" HorizontalAlignment="Center"/>
-            <Slider x:Name="ScaleSlider" Minimum="0.1" Maximum="100" TickFrequency="0.1" IsSnapToTickEnabled="True" Value="0" ValueChanged="ScaleSlider_ValueChanged"/>
+            <Slider x:Name="ScaleSlider" Minimum="1" Maximum="100" TickFrequency="1" IsSnapToTickEnabled="True" Value="0" ValueChanged="ScaleSlider_ValueChanged"/>
             <TextBlock Text="" x:Name="scalerText"/>
         </StackPanel>
     </Grid>

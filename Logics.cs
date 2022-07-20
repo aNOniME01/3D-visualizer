@@ -21,35 +21,64 @@ namespace _3D_visualizer
         {
             IsPerspective = false;
 
-            MainCam = new Camera(-10, 0,0);
+            MainCam = new Camera(-4, 0,0);
 
             Mesh = new Mesh3D(loc);
 
-            ScaleMesh(1);
+            if (loc.Split('.').Last() == "obj") ScaleMesh(10);
+            else ScaleMesh(1);
 
             Refresh();
         }
         public static void Refresh()
         {
             Renderer.ClearCanvas();
+            int num = 0;
             foreach (var vertex in Mesh.Vertecies)
             {
-                Renderer.AddPoint(vertex);
+                num++;
+                Renderer.AddPoint(vertex,num);
             }
             foreach (var line in Mesh.Lines)
             {
-                Renderer.AddLine(ProjectTo2D(Mesh.Vertecies[line[0]].Vertex), ProjectTo2D(Mesh.Vertecies[line[1]].Vertex));
+                Renderer.AddLine(ProjectTo2D(Mesh.Vertecies[line[0]]), ProjectTo2D(Mesh.Vertecies[line[1]]));
             }
-            Renderer.AddOriginPoint(ProjectTo2D(Mesh.Origin));
+            Renderer.AddOriginPoint(Mesh.Origin);
+            Renderer.AddMeshInfo(Mesh);
         }
 
-        public static Vector3 ProjectTo2D(Vector3 point)
+        public static Vector3 ProjectTo2D(Point3D point)
         {
-            float F = point.X - MainCam.Location.X;
-            if (point.X == 0 && point.Y == 0 && point.Z == 0) return point;
-            return new Vector3(point.X,
-                                (point.Y - MainCam.Location.Y) * (F/ point.X),
-                                (point.Z - MainCam.Location.X) * (F / point.X));
+            if (IsPerspective)
+            {
+                float X, Y, Z;
+                if (point.Location.X == 0 && point.Location.Y == 0 && point.Location.Z == 0)
+                {
+                    return point.Location;
+                    //X = 1;
+                    //Y = 1;
+                    //Z = 1;
+                }
+                else
+                {
+                    X = point.Location.X;
+                    Y = point.Location.Y;
+                    Z = point.Location.Z;
+                }
+
+                float F = X - MainCam.Location.X;
+
+                float yHlpr = ((Y - MainCam.Location.Y) * (F / X)) + MainCam.Location.X;
+                if (yHlpr < float.MaxValue && yHlpr > float.MinValue) Y = yHlpr;
+                float zHlpr = ((Z - MainCam.Location.Z) * (F / X)) + MainCam.Location.X;
+                if (zHlpr < float.MaxValue && zHlpr > float.MinValue) Z = zHlpr;
+
+                return new Vector3(X, Y, Z);
+            }
+            else
+            {
+                return new Vector3(point.Location.X, point.Location.Y, point.Location.Z);
+            }
         }
 
         public static void PerspectiveTo(bool isPerspective)
@@ -62,7 +91,7 @@ namespace _3D_visualizer
             Mesh.SetScale(scale, scale, scale);
         }
 
-        public static void RotateMesh(float x,float y, float z)
+        public static void RotateMesh(float? x,float? y, float? z)
         {
             Mesh.Rotate(x,y,z);
             Refresh();
