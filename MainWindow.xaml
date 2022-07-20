@@ -11,30 +11,39 @@
             <ColumnDefinition />
             <ColumnDefinition Width="150"/>
         </Grid.ColumnDefinitions>
-        
-        <Canvas x:Name="canvas"  Grid.Column="0" Background="Black"/>
 
+        <Canvas x:Name="canvas"  Grid.Column="0" Background="Black" MouseMove="canvas_MouseMove"/>
+        
         <StackPanel Grid.Column="1">
+            
             <StackPanel Orientation="Horizontal">
                 <CheckBox Checked="CheckBox_Checked"  Unchecked="CheckBox_Unchecked_1"/>
                 <TextBlock Text="show vertex info" Margin="10,0,0,0"/>
             </StackPanel>
+            
             <StackPanel Orientation="Horizontal">
                 <CheckBox Checked="persp_Checked" Unchecked="CheckBox_Unchecked"/>
                 <TextBlock Text="Perspective" Margin="10,0,0,0"/>
             </StackPanel>
+            
             <TextBlock Text="X Rotation" HorizontalAlignment="Center"/>
             <Slider x:Name="RotXSlider" Minimum="0" Maximum="360" TickFrequency="1" IsSnapToTickEnabled="True" Value="0" ValueChanged="RotXSlider_ValueChanged"/>
             <TextBlock Text="" x:Name="Xrot"/>
+            
             <TextBlock Text="Y Rotation" HorizontalAlignment="Center"/>
             <Slider x:Name="RotYSlider" Minimum="0" Maximum="360" TickFrequency="1" IsSnapToTickEnabled="True" Value="0" ValueChanged="RotYSlider_ValueChanged"/>
             <TextBlock Text="" x:Name="Yrot"/>
+            
             <TextBlock Text="Z Rotation" HorizontalAlignment="Center"/>
             <Slider x:Name="RotZSlider" Minimum="0" Maximum="360" TickFrequency="1" IsSnapToTickEnabled="True" Value="0" ValueChanged="RotZSlider_ValueChanged"/>
             <TextBlock Text="" x:Name="Zrot"/>
+           
             <TextBlock Text="Scale" HorizontalAlignment="Center"/>
             <Slider x:Name="ScaleSlider" Minimum="1" Maximum="100" TickFrequency="1" IsSnapToTickEnabled="True" Value="0" ValueChanged="ScaleSlider_ValueChanged"/>
             <TextBlock Text="" x:Name="scalerText"/>
+            
+            <TextBlock Text="" x:Name="testerText"/>
+       
         </StackPanel>
     </Grid>
 </Window>

@@ -19,13 +19,16 @@ namespace _3D_visualizer
         private static bool VertexInfo;
 
 
+        #region Load
         public static void Load(Canvas cnvs) 
         {
             canvas = cnvs;
             WHeight = canvas.ActualHeight;
             WWidth = canvas.ActualWidth;
         }
+        #endregion
 
+        #region Line
         public static void AddLine(Vector3 p1, Vector3 p2)
         {
             Line line = new Line();
@@ -52,34 +55,61 @@ namespace _3D_visualizer
             }
             catch {}
         }
+        #endregion
+
+        #region Point
         public static void AddPoint(Point3D point,int num) 
         {
 
             Vector3 projected = Logics.ProjectTo2D(point);
-            Rectangle rectangle = new Rectangle();
-            rectangle.Height = 5;
-            rectangle.Width = 5;
-            rectangle.Fill = Brushes.LimeGreen;
 
-            Canvas.SetLeft(rectangle, projected.Y - (rectangle.Width/2) + WWidth/2);
-            Canvas.SetBottom(rectangle, projected.Z - (rectangle.Height / 2) + WHeight/2);
+            Canvas.SetLeft(point.Body, projected.Y - (point.Body.Width/2) + WWidth/2);
+            Canvas.SetBottom(point.Body, projected.Z - (point.Body.Height / 2) + WHeight/2);
 
             try
             {
-                canvas.Children.Add(rectangle);
+                canvas.Children.Add(point.Body);
             }
             catch { }
-            if (VertexInfo) AddVertexInfo(point,num,projected,Brushes.Red);
+            if (VertexInfo) AddVertexInfo(point,num,Brushes.Red);
         }
-        private static void AddVertexInfo(Point3D point,int num, Vector3 projected,Brush color)
+
+        public static void AddOriginPoint(Point3D point) 
+        {
+            Vector3 projected = Logics.ProjectTo2D(point);
+
+            Canvas.SetLeft(point.Body, projected.Y - (point.Body.Width / 2) + WWidth / 2);
+            Canvas.SetBottom(point.Body, projected.Z - (point.Body.Height / 2) + WHeight / 2);
+
+            try
+            {
+                canvas.Children.Add(point.Body);
+            }
+            catch { }
+            if (VertexInfo) AddVertexInfo(point,0, Brushes.Green);
+        }
+
+        public static void RemovePoint(Rectangle point) 
+        {
+            try
+            {
+                canvas.Children.Remove(point);
+            }
+            catch {}
+        }
+        #endregion
+
+        #region Info
+        private static void AddVertexInfo(Point3D point, int num, Brush color)
         {
             TextBlock vertexInfo = new TextBlock();
-            vertexInfo.Text = $"{num}\n" /* +
-                $"{point.Location.X.ToString("0.0")},{point.Location.Y.ToString("0.0")},{point.Location.Z.ToString("0.0")} \n" +
+            vertexInfo.Text = $"{num}\n" +
+                $"{point.Location.X.ToString("0.0")},{point.Location.Y.ToString("0.0")},{point.Location.Z.ToString("0.0")} \n"/* +
                 $" {point.Rotation.X.ToString("0.0")},{point.Rotation.Y.ToString("0.0")},{point.Rotation.Z.ToString("0.0")}"*/;
             vertexInfo.FontSize = 8;
             vertexInfo.Foreground = color;
 
+            Vector3 projected = Logics.ProjectTo2D(point);
             Canvas.SetLeft(vertexInfo, projected.Y + WWidth / 2);
             Canvas.SetBottom(vertexInfo, projected.Z + WHeight / 2);
 
@@ -94,41 +124,22 @@ namespace _3D_visualizer
             meshInfo.FontSize = 10;
             meshInfo.Foreground = Brushes.Lime;
 
-            Canvas.SetLeft(meshInfo,2);
-            Canvas.SetBottom(meshInfo,WHeight-28);
+            Canvas.SetLeft(meshInfo, 2);
+            Canvas.SetBottom(meshInfo, WHeight - 28);
             canvas.Children.Add(meshInfo);
         }
+        #endregion
 
-        public static void AddOriginPoint(Point3D point) 
-        {
-            Vector3 projected = Logics.ProjectTo2D(point);
-            Rectangle rectangle = new Rectangle();
-            rectangle.Height = 5;
-            rectangle.Width = 5;
-            rectangle.Fill = Brushes.Red;
-
-            Canvas.SetLeft(rectangle, projected.Y - (rectangle.Width / 2) + WWidth / 2);
-            Canvas.SetBottom(rectangle, projected.Z - (rectangle.Height / 2) + WHeight / 2);
-
-            try
-            {
-                canvas.Children.Add(rectangle);
-            }
-            catch { }
-            if (VertexInfo) AddVertexInfo(point,0, projected, Brushes.Green);
-        }
-
-        public static void RemovePoint(Rectangle point) 
-        {
-            try
-            {
-                canvas.Children.Remove(point);
-            }
-            catch {}
-        }
-
+        #region Operation
         public static void ClearCanvas() => canvas.Children.Clear();
+        #endregion
 
-        public static void SetVertexInfo(bool bolean) => VertexInfo = bolean;
+        #region Set
+        public static void SetVertexInfo(bool vertexInfo) 
+        { 
+            VertexInfo = vertexInfo;
+            Logics.Refresh();
+        }
+        #endregion
     }
 }

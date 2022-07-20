@@ -4,17 +4,30 @@ using System.Linq;
 using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Media;
+using System.Windows.Shapes;
 
 namespace _3D_visualizer
 {
     internal class Point3D
     {
+        public int VertIndex { get; private set; }
+
         public Vector3 DefLocation { get; private set; }
         public Vector3 Location { get; private set; }
+
         public Vector3 QuadrantAngle { get; private set; }
         public Vector3 Rotation { get; private set; }
-        public Point3D(float x, float y, float z, Point3D origin)
+
+        public Rectangle Body { get; private set; }
+        public bool IsInfoDisplayed { get; private set; }
+
+
+        #region Constructor
+        public Point3D(float x, float y, float z, Point3D origin,int index)
         {
+            this.VertIndex = index;
+
             DefLocation = new Vector3(x, y, z);
             Location = new Vector3(DefLocation.X, DefLocation.Y, DefLocation.Z);
 
@@ -40,9 +53,19 @@ namespace _3D_visualizer
 
             QuadrantAngle = new Vector3(X, Y, Z);
             Rotation = new Vector3(X, Y, Z);
+
+            Body = new Rectangle();
+            Body.Height = 5;
+            Body.Width = 5;
+            Body.Fill = Brushes.LimeGreen;
+
+            IsInfoDisplayed = false;
+
         }
         public Point3D(float x, float y, float z)
         {
+            VertIndex = 0;
+
             DefLocation = new Vector3(x, y, z);
             Location = new Vector3(DefLocation.X, DefLocation.Y, DefLocation.Z);
 
@@ -55,17 +78,24 @@ namespace _3D_visualizer
 
             QuadrantAngle = new Vector3(X, Y, Z);
             Rotation = new Vector3(X, Y, Z);
-        }
-        private float DistanceBetween(Vector3 p1, Vector3 p2) => (float)Math.Sqrt(Math.Pow(p2.X - p1.X, 2) + Math.Pow(p2.Y - p1.Y, 2) + Math.Pow(p2.Z - p1.Z, 2));
-        private float DistanceBetween(float p1x, float p1y, float p2x, float p2y) => (float)Math.Sqrt(Math.Pow(p2x - p1x, 2) + Math.Pow(p2y - p1y, 2));
-        private float DistanceBetween(float p1, float p2) => (float)Math.Sqrt(Math.Pow(p2 - p1, 2));
 
-        private float Flip(float x) => x < 0 ? -(180 + x) : 180 - x;
-        private float ToPositiveDegree(float x) => x < 0 ? 360 + x : x;
+            Body = new Rectangle();
+            Body.Height = 5;
+            Body.Width = 5;
+            Body.Fill = Brushes.Red;
+
+            IsInfoDisplayed = false;
+        }
+        #endregion
+
+        #region Location
         public void ChangeLocation(Vector3 loc)
         {
             Location = new Vector3(loc.X,loc.Y,loc.Z);
         }
+        #endregion
+
+        #region Rotation
         public void ChangeXRotation1(Point3D origin)
         {
             Rotation = new Vector3(QuadrantAngle.X + origin.Rotation.X, QuadrantAngle.Y + origin.Rotation.Y, QuadrantAngle.Z + origin.Rotation.Z);
@@ -160,10 +190,19 @@ namespace _3D_visualizer
         {
             Rotation = new Vector3(rot.X, rot.Y, rot.Z);
         }
+        #endregion
+
+        #region Operations
+        public static float DistanceBetween(Vector3 p1, Vector3 p2) => (float)Math.Sqrt(Math.Pow(p2.X - p1.X, 2) + Math.Pow(p2.Y - p1.Y, 2) + Math.Pow(p2.Z - p1.Z, 2));
+        public static float DistanceBetween(float p1x, float p1y, float p2x, float p2y) => (float)Math.Sqrt(Math.Pow(p2x - p1x, 2) + Math.Pow(p2y - p1y, 2));
+        public static float DistanceBetween(float p1, float p2) => (float)Math.Sqrt(Math.Pow(p2 - p1, 2));
+
+        private float Flip(float x) => x < 0 ? -(180 + x) : 180 - x;
+        private float ToPositiveDegree(float x) => x < 0 ? 360 + x : x;
         private double AngleToRadians(double angle)
         {
             return (Math.PI / 180) * angle;
         }
-
+        #endregion
     }
 }

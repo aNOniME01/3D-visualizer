@@ -15,6 +15,8 @@ namespace _3D_visualizer
         public List<int[]> Lines { get; private set; }
         public Vector3 Scale { get; private set; }
 
+
+        #region Constructor
         public Mesh3D(string loc)
         {
             Vertecies = new List<Point3D>();
@@ -35,6 +37,8 @@ namespace _3D_visualizer
         {
             StreamReader sr = File.OpenText(loc);
 
+            int index = 0;
+
             while (!sr.EndOfStream)
             {
                 string[] hlpr = sr.ReadLine().Trim().Split(' ');
@@ -44,7 +48,8 @@ namespace _3D_visualizer
                 {
                     if (hlpr[0] == "v")
                     {
-                        Vertecies.Add(new Point3D((float)Convert.ToDouble(hlpr[1]), (float)Convert.ToDouble(hlpr[2]), (float)Convert.ToDouble(hlpr[3]), Origin));
+                        Vertecies.Add(new Point3D((float)Convert.ToDouble(hlpr[1]), (float)Convert.ToDouble(hlpr[2]), (float)Convert.ToDouble(hlpr[3]), Origin,index));
+                        index++;
                     }
                     else if (hlpr[0] == "f")
                     {
@@ -73,14 +78,6 @@ namespace _3D_visualizer
                 }
             }
         }
-        private bool SameLineExist(int[] line)
-        {
-            foreach (var item in Lines)
-            {
-                if ((item[0] == line[0]&& item[1] == line[1])|| (item[0] == line[1] && item[1] == line[0])) return true;
-            }
-            return false;
-        }
         private void ReadInFromTxt(string loc)
         {
             StreamReader sr = File.OpenText(loc);
@@ -89,6 +86,7 @@ namespace _3D_visualizer
             {
                 string[] hlpr = sr.ReadLine().Trim().Split(';');
 
+                int index = 0;
                 if (hlpr[0] != "")
                 {
                     if (hlpr[0][0] == 'O')
@@ -99,7 +97,8 @@ namespace _3D_visualizer
                     else if (hlpr[0][0] == 'P')
                     {
                         hlpr[0] = hlpr[0].Trim('P');
-                        Vertecies.Add(new Point3D(Convert.ToInt32(hlpr[0]), Convert.ToInt32(hlpr[1]), Convert.ToInt32(hlpr[2]), Origin));
+                        Vertecies.Add(new Point3D(Convert.ToInt32(hlpr[0]), Convert.ToInt32(hlpr[1]), Convert.ToInt32(hlpr[2]), Origin,index));
+                        index++;
                     }
                     else if (hlpr[0][0] == 'L')
                     {
@@ -110,9 +109,20 @@ namespace _3D_visualizer
             }
 
         }
-        private float DistanceBetween(Vector3 p1, Vector3 p2) => (float)Math.Sqrt(Math.Pow(p2.X - p1.X, 2) + Math.Pow(p2.Y - p1.Y, 2) + Math.Pow(p2.Z - p1.Z, 2));
-        private float DistanceBetween(float p1x, float p1y, float p2x, float p2y) => (float)Math.Sqrt(Math.Pow(p2x - p1x, 2) + Math.Pow(p2y - p1y, 2));
-        private float DistanceBetween(float p1, float p2) => (float)Math.Sqrt(Math.Pow(p2 - p1, 2));
+        #endregion
+
+        #region Checks
+        private bool SameLineExist(int[] line)
+        {
+            foreach (var item in Lines)
+            {
+                if ((item[0] == line[0] && item[1] == line[1]) || (item[0] == line[1] && item[1] == line[0])) return true;
+            }
+            return false;
+        }
+        #endregion
+
+        #region Rotate
         public void Rotate(float? x, float? y, float? z)
         {
             float X, Y, Z;
@@ -139,7 +149,9 @@ namespace _3D_visualizer
                 //if (Origin.Rotation.Z != 0) vertex.ChangeZRoitation1(Origin);
             }
         }
+        #endregion
 
+        #region Scale
         public void SetScale(float x, float y, float z)
         {
             Scale = new Vector3(x, y, z);
@@ -151,9 +163,9 @@ namespace _3D_visualizer
 
             for (int i = 0; i < Vertecies.Count; i++)
             {
-                float xDistance = DistanceBetween(Origin.Location.X, Vertecies[i].DefLocation.X);
-                float yDistance = DistanceBetween(Origin.Location.Y, Vertecies[i].DefLocation.Y);
-                float zDistance = DistanceBetween(Origin.Location.Z, Vertecies[i].DefLocation.Z);
+                float xDistance = Point3D.DistanceBetween(Origin.Location.X, Vertecies[i].DefLocation.X);
+                float yDistance = Point3D.DistanceBetween(Origin.Location.Y, Vertecies[i].DefLocation.Y);
+                float zDistance = Point3D.DistanceBetween(Origin.Location.Z, Vertecies[i].DefLocation.Z);
                 float xScale, yScale, zScale;
 
                 if (Vertecies[i].DefLocation.X < Origin.Location.X) xScale = -(xDistance * Scale.X-xDistance);
@@ -169,6 +181,6 @@ namespace _3D_visualizer
             }
 
         }
-
+        #endregion
     }
 }

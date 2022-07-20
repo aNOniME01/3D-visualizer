@@ -17,6 +17,8 @@ namespace _3D_visualizer
         private static Camera MainCam;
         private static Mesh3D Mesh;
 
+
+        #region Logic
         public static void Load(string loc)
         {
             IsPerspective = false;
@@ -46,7 +48,9 @@ namespace _3D_visualizer
             Renderer.AddOriginPoint(Mesh.Origin);
             Renderer.AddMeshInfo(Mesh);
         }
+        #endregion
 
+        #region Projection
         public static Vector3 ProjectTo2D(Point3D point)
         {
             if (IsPerspective)
@@ -80,22 +84,35 @@ namespace _3D_visualizer
                 return new Vector3(point.Location.X, point.Location.Y, point.Location.Z);
             }
         }
+        #endregion
 
-        public static void PerspectiveTo(bool isPerspective)
-        { 
-            IsPerspective = isPerspective;
-        }
-
+        #region Scale
         public static void ScaleMesh(float scale)
         {
             Mesh.SetScale(scale, scale, scale);
         }
+        #endregion
 
+        #region Rotate
         public static void RotateMesh(float? x,float? y, float? z)
         {
             Mesh.Rotate(x,y,z);
             Refresh();
         }
+        #endregion
 
+        #region Get
+        public static Point3D GetOrigin() => Mesh.Origin;
+        public static Mesh3D GetMesh() => Mesh;
+        public static bool GetIsPerspective() => IsPerspective;
+        #endregion
+
+        #region Set
+        public static void PerspectiveTo(bool isPerspective)
+        {
+            IsPerspective = isPerspective;
+            Refresh();
+        }
+        #endregion
     }
 }
