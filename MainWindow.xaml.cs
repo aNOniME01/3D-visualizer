@@ -33,7 +33,8 @@ namespace _3D_visualizer
             //Logics.Load("cube.obj");
             //Logics.Load("uvsphere.obj");
             //Logics.Load("circle.obj");
-            Logics.Load("testsphere.obj");
+            //Logics.Load("testsphere.obj");
+            //Logics.Load("testsphere2.obj");
             //Logics.Load("icosphere.obj");
             //Logics.Load("hghrsicosphere.obj");
             //Logics.Load("monkey.obj");

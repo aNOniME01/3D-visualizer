@@ -74,9 +74,9 @@ namespace _3D_visualizer
         private static void AddVertexInfo(Point3D point,int num, Vector3 projected,Brush color)
         {
             TextBlock vertexInfo = new TextBlock();
-            vertexInfo.Text = $"{num}\n" +
+            vertexInfo.Text = $"{num}\n" /* +
                 $"{point.Location.X.ToString("0.0")},{point.Location.Y.ToString("0.0")},{point.Location.Z.ToString("0.0")} \n" +
-                $" {point.Rotation.X.ToString("0.0")},{point.Rotation.Y.ToString("0.0")},{point.Rotation.Z.ToString("0.0")}";
+                $" {point.Rotation.X.ToString("0.0")},{point.Rotation.Y.ToString("0.0")},{point.Rotation.Z.ToString("0.0")}"*/;
             vertexInfo.FontSize = 8;
             vertexInfo.Foreground = color;
 

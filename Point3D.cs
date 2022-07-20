@@ -27,18 +27,18 @@ namespace _3D_visualizer
             else X = 90;
 
             float yAngle = ToPositiveDegree((float)(Math.Atan2(x - origin.Location.X, z - origin.Location.Z) * (180 / Math.PI)));
-            if (yAngle <= 90) Y = 180;
-            else if (yAngle < 180) Y = 90;
-            else if (yAngle <= 270) Y = 0;
-            else Y = 270;
+            if (yAngle <= 90) Y = 0;
+            else if (yAngle < 180) Y = 270;
+            else if (yAngle <= 270) Y = 180;
+            else Y = 90;
 
             float zAngle = ToPositiveDegree(Flip((float)(Math.Atan2(y - origin.Location.Y, x - origin.Location.X) * (180 / Math.PI))));
-            if (zAngle <= 90) Z = 0;
-            else if (zAngle < 180) Z = 270;
-            else if (zAngle <= 270) Z = 180;
-            else Z = 90;
+            if (zAngle <= 90) Z = 270;
+            else if (zAngle < 180) Z = 0;
+            else if (zAngle <= 270) Z = 90;
+            else Z = 180;
 
-            QuadrantAngle = new Vector3(X, yAngle, zAngle);
+            QuadrantAngle = new Vector3(X, Y, Z);
             Rotation = new Vector3(X, Y, Z);
         }
         public Point3D(float x, float y, float z)
