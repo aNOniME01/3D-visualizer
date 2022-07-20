@@ -204,5 +204,13 @@ namespace _3D_visualizer
             return (Math.PI / 180) * angle;
         }
         #endregion
+
+        #region Set
+        public void SetIsInfoDisplayed(bool isInfoDisplayed)
+        {
+            IsInfoDisplayed = isInfoDisplayed;
+            Logics.Refresh();
+        }
+        #endregion
     }
 }

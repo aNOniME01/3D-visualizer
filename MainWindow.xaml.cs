@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
@@ -54,29 +55,25 @@ namespace _3D_visualizer
         {
             Point mousePoint = Mouse.GetPosition(Logics.GetOrigin().Body);
             Mesh3D mesh = Logics.GetMesh();
-            bool isMouseOver = false;
             foreach (var vertex in mesh.Vertecies)
             {
-                float x, y;
+                float y, z;
                 if (Logics.GetIsPerspective())
                 {
-                    x = vertex.Location.X;
-                    y = vertex.Location.Y;
+                    Vector3 projected = Logics.ProjectTo2D(vertex);
+                    y = projected.Y;
+                    z = projected.Z;
                 }
                 else
                 {
-                    x = vertex.Location.X;
                     y = vertex.Location.Y;
+                    z = vertex.Location.Z;
                 }
 
-                float dis = Point3D.DistanceBetween(x, y, (float)mousePoint.X, (float)mousePoint.Y);
-                if (dis < 10)
-                {
-                    //Sets the vertexinfo to true at the vertex
-                    isMouseOver = true;
-                }
+                float dis = Point3D.DistanceBetween(y, z, (float)mousePoint.X, (float)mousePoint.Y);
+                if (dis < 10) vertex.SetIsInfoDisplayed(true);
+                else vertex.SetIsInfoDisplayed(false);
             }
-            Renderer.SetVertexInfo(isMouseOver);
             testerText.Text = $"{mousePoint.X},{mousePoint.Y}";
         }
 

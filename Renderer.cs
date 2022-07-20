@@ -33,9 +33,9 @@ namespace _3D_visualizer
         {
             Line line = new Line();
             line.X1 = p1.Y + WWidth/2;
-            line.Y1 = WHeight - (p1.Z + WHeight / 2);
+            line.Y1 = p1.Z + WHeight / 2;
             line.X2 = p2.Y + WWidth / 2;
-            line.Y2 = WHeight - (p2.Z + WHeight / 2);
+            line.Y2 = p2.Z + WHeight / 2;
 
             line.StrokeThickness = 1;
             line.Stroke = Brushes.Lime;
@@ -64,14 +64,14 @@ namespace _3D_visualizer
             Vector3 projected = Logics.ProjectTo2D(point);
 
             Canvas.SetLeft(point.Body, projected.Y - (point.Body.Width/2) + WWidth/2);
-            Canvas.SetBottom(point.Body, projected.Z - (point.Body.Height / 2) + WHeight/2);
+            Canvas.SetTop(point.Body, projected.Z - (point.Body.Height / 2) + WHeight/2);
 
             try
             {
                 canvas.Children.Add(point.Body);
             }
             catch { }
-            if (VertexInfo) AddVertexInfo(point,num,Brushes.Red);
+            if (VertexInfo) AddVertexInfo(point,Brushes.Red);
         }
 
         public static void AddOriginPoint(Point3D point) 
@@ -79,14 +79,14 @@ namespace _3D_visualizer
             Vector3 projected = Logics.ProjectTo2D(point);
 
             Canvas.SetLeft(point.Body, projected.Y - (point.Body.Width / 2) + WWidth / 2);
-            Canvas.SetBottom(point.Body, projected.Z - (point.Body.Height / 2) + WHeight / 2);
+            Canvas.SetTop(point.Body, projected.Z - (point.Body.Height / 2) + WHeight / 2);
 
             try
             {
                 canvas.Children.Add(point.Body);
             }
             catch { }
-            if (VertexInfo) AddVertexInfo(point,0, Brushes.Green);
+            if (VertexInfo) AddVertexInfo(point, Brushes.Green);
         }
 
         public static void RemovePoint(Rectangle point) 
@@ -100,13 +100,11 @@ namespace _3D_visualizer
         #endregion
 
         #region Info
-        private static void AddVertexInfo(Point3D point, int num, Brush color)
+        private static void AddVertexInfo(Point3D point, Brush color)
         {
             TextBlock vertexInfo = new TextBlock();
-            vertexInfo.Text = $"{num}\n" +
-                $"{point.Location.X.ToString("0.0")},{point.Location.Y.ToString("0.0")},{point.Location.Z.ToString("0.0")} \n"/* +
-                $" {point.Rotation.X.ToString("0.0")},{point.Rotation.Y.ToString("0.0")},{point.Rotation.Z.ToString("0.0")}"*/;
-            vertexInfo.FontSize = 8;
+            vertexInfo.Text = point.IsInfoDisplayed ? $"{point.VertIndex} \n {GetVertexInfo(point)}" 
+                                                    : $"{point.VertIndex} \n";
             vertexInfo.Foreground = color;
 
             Vector3 projected = Logics.ProjectTo2D(point);
@@ -114,6 +112,12 @@ namespace _3D_visualizer
             Canvas.SetBottom(vertexInfo, projected.Z + WHeight / 2);
 
             canvas.Children.Add(vertexInfo);
+        }
+
+        private static string GetVertexInfo(Point3D point)
+        {
+            return $"Loc: x{point.Location.X.ToString("0.0")}, y{point.Location.Y.ToString("0.0")}, z{point.Location.Z.ToString("0.0")} \n" +
+                $"Rot: x{point.Rotation.X.ToString("0.0")}, y{point.Rotation.Y.ToString("0.0")}, z{point.Rotation.Z.ToString("0.0")}";
         }
 
         public static void AddMeshInfo(Mesh3D mesh)
