@@ -12,12 +12,12 @@
             <ColumnDefinition Width="150"/>
         </Grid.ColumnDefinitions>
 
-        <Canvas x:Name="canvas"  Grid.Column="0" Background="Black" MouseMove="canvas_MouseMove"/>
+        <Canvas x:Name="canvas"  Grid.Column="0" Background="Black" MouseDown="canvas_MouseDown"/>
         
         <StackPanel Grid.Column="1">
             
             <StackPanel Orientation="Horizontal">
-                <CheckBox Checked="CheckBox_Checked"  Unchecked="CheckBox_Unchecked_1"/>
+                <CheckBox x:Name="infoDisplay" Checked="CheckBox_Checked"  Unchecked="CheckBox_Unchecked_1"/>
                 <TextBlock Text="show vertex info" Margin="10,0,0,0"/>
             </StackPanel>
             

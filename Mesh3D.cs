@@ -133,7 +133,7 @@ namespace _3D_visualizer
             if (z != null) Z = (float)z;
             else Z = Origin.Rotation.Z;
 
-            Origin.ChangeRotation(new Vector3(X, Y, Z));
+            Origin.SetRotation(new Vector3(X, Y, Z));
 
             ScaleMesh();
 

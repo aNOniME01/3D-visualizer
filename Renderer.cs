@@ -103,13 +103,15 @@ namespace _3D_visualizer
         private static void AddVertexInfo(Point3D point, Brush color)
         {
             TextBlock vertexInfo = new TextBlock();
-            vertexInfo.Text = point.IsInfoDisplayed ? $"{point.VertIndex} \n {GetVertexInfo(point)}" 
+            
+            /*if(point.Location.X <= 0)*/vertexInfo.Text = point.IsInfoDisplayed ? $"{point.VertIndex} \n {GetVertexInfo(point)}" 
                                                     : $"{point.VertIndex} \n";
-            vertexInfo.Foreground = color;
+            if (point.Location.X >= 0) vertexInfo.Foreground = Brushes.DarkRed;
+            else vertexInfo.Foreground = color;
 
             Vector3 projected = Logics.ProjectTo2D(point);
             Canvas.SetLeft(vertexInfo, projected.Y + WWidth / 2);
-            Canvas.SetBottom(vertexInfo, projected.Z + WHeight / 2);
+            Canvas.SetTop(vertexInfo, projected.Z + WHeight / 2);
 
             canvas.Children.Add(vertexInfo);
         }

@@ -22,7 +22,7 @@ namespace _3D_visualizer
         {
             Location = new Vector3(x, y, z);
 
-            FocalLength = 10;
+            FocalLength = 300;
             Skew = 0;
             
             ImageRes = new Vector2(400, 400);

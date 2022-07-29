@@ -46,10 +46,10 @@ namespace _3D_visualizer
             else Y = 90;
 
             float zAngle = ToPositiveDegree(Flip((float)(Math.Atan2(y - origin.Location.Y, x - origin.Location.X) * (180 / Math.PI))));
-            if (zAngle <= 90) Z = 270;
-            else if (zAngle < 180) Z = 0;
-            else if (zAngle <= 270) Z = 90;
-            else Z = 180;
+            if (zAngle <= 90) Z = 0;
+            else if (zAngle < 180) Z = 270;
+            else if (zAngle <= 270) Z = 180;
+            else Z = 90;
 
             QuadrantAngle = new Vector3(X, Y, Z);
             Rotation = new Vector3(X, Y, Z);
@@ -96,20 +96,11 @@ namespace _3D_visualizer
         #endregion
 
         #region Rotation
-        public void ChangeXRotation1(Point3D origin)
-        {
-            Rotation = new Vector3(QuadrantAngle.X + origin.Rotation.X, QuadrantAngle.Y + origin.Rotation.Y, QuadrantAngle.Z + origin.Rotation.Z);
-
-            float X, Y, Z;
-            X = Location.X;
-            Y = DistanceBetween(origin.Location.Y,Location.Y) * (float)Math.Cos(AngleToRadians(Rotation.X));
-            Z = DistanceBetween(origin.Location.Z,Location.Z) * (float)Math.Sin(AngleToRadians(Rotation.X));
-
-            Location = new Vector3(X, Y, Z);
-        }
         public void ChangeXRotation(Point3D origin)
         {
-            Rotation = new Vector3(QuadrantAngle.X + origin.Rotation.X, QuadrantAngle.Y + origin.Rotation.Y, QuadrantAngle.Z + origin.Rotation.Z);
+            float rX = origin.Rotation.X;
+            if (QuadrantAngle.X == 90 || QuadrantAngle.X == 270) rX *= -1;
+            Rotation = new Vector3(QuadrantAngle.X + rX, Rotation.Y, Rotation.Z);
 
             float disY, disZ;
             disY = DistanceBetween(origin.Location.Y, Location.Y);
@@ -124,22 +115,20 @@ namespace _3D_visualizer
             Y = disY * cosX - disZ * sinX;
             Z = disZ * cosX + disY * sinX;
 
-            Location = new Vector3(X, Y, Z);
-        }
-        public void ChangeYRotation1(Point3D origin)
-        {
-            Rotation = new Vector3(QuadrantAngle.X + origin.Rotation.X, QuadrantAngle.Y + origin.Rotation.Y, QuadrantAngle.Z + origin.Rotation.Z);
-            
-            float X, Y, Z;
-            X = DistanceBetween(origin.Location.X, Location.X) * (float)Math.Cos(AngleToRadians(Rotation.Y));
-            Y = Location.Y;
-            Z = DistanceBetween(origin.Location.Z, Location.Z) * (float)Math.Sin(AngleToRadians(Rotation.Y));
-            
+            if (QuadrantAngle.X == 90 || QuadrantAngle.X == 270)
+            {
+                float hlpr = Y;
+                Y = Z* -1;
+                Z = hlpr* -1;
+            }
+
             Location = new Vector3(X, Y, Z);
         }
         public void ChangeYRotation(Point3D origin)
         {
-            Rotation = new Vector3(QuadrantAngle.X + origin.Rotation.X, QuadrantAngle.Y + origin.Rotation.Y, QuadrantAngle.Z + origin.Rotation.Z);
+            float rY = origin.Rotation.Y;
+            if (QuadrantAngle.Y == 180|| QuadrantAngle.Y == 0) rY *= -1;
+            Rotation = new Vector3(Rotation.X, QuadrantAngle.Y + rY, Rotation.Z);
             
             float disX, disZ;
             disX = DistanceBetween(origin.Location.X, Location.X);
@@ -153,24 +142,21 @@ namespace _3D_visualizer
             X = disZ * cosY - disX * sinY;
             Y = Location.Y;
             Z = disX * cosY + disZ * sinY;
-            
-            Location = new Vector3(X, Y, Z);
-        }
-        public void ChangeZRotation1(Point3D origin)
-        {
-            
-            Rotation = new Vector3(QuadrantAngle.X + origin.Rotation.X, QuadrantAngle.Y + origin.Rotation.Y, QuadrantAngle.Z + origin.Rotation.Z);
-            
-            float X, Y, Z;
-            X = DistanceBetween(origin.Location.X, Location.X) * (float)Math.Sin(AngleToRadians(Rotation.Z));
-            Y = DistanceBetween(origin.Location.Y, Location.Y) * (float)Math.Cos(AngleToRadians(Rotation.Z));
-            Z = Location.Z;
+
+            if (QuadrantAngle.Y == 180 || QuadrantAngle.Y == 0)
+            {
+                float hlpr = X;
+                X = Z;
+                Z = hlpr;
+            }
+
             Location = new Vector3(X, Y, Z);
         }
         public void ChangeZRotation(Point3D origin)
         {
-            
-            Rotation = new Vector3(QuadrantAngle.X + origin.Rotation.X, QuadrantAngle.Y + origin.Rotation.Y, QuadrantAngle.Z + origin.Rotation.Z);
+            float rZ = origin.Rotation.Z;
+            if (QuadrantAngle.Z == 270 || QuadrantAngle.Z == 90) rZ *= -1;
+            Rotation = new Vector3(Rotation.X, Rotation.Y, QuadrantAngle.Z + rZ);;
            
             float disX, disY;
             disX = DistanceBetween(origin.Location.X, Location.X);
@@ -184,9 +170,17 @@ namespace _3D_visualizer
             X = disX * cosZ + disY * sinZ;
             Y = disY * cosZ - disX * sinZ;
             Z = Location.Z;
+
+            if (QuadrantAngle.Z == 270 || QuadrantAngle.Z == 90)
+            {
+                float hlpr = X * -1;
+                X = Y;
+                Y = hlpr;
+            }
+
             Location = new Vector3(X, Y, Z);
         }
-        public void ChangeRotation(Vector3 rot)
+        public void SetRotation(Vector3 rot)
         {
             Rotation = new Vector3(rot.X, rot.Y, rot.Z);
         }
@@ -198,11 +192,8 @@ namespace _3D_visualizer
         public static float DistanceBetween(float p1, float p2) => (float)Math.Sqrt(Math.Pow(p2 - p1, 2));
 
         private float Flip(float x) => x < 0 ? -(180 + x) : 180 - x;
-        private float ToPositiveDegree(float x) => x < 0 ? 360 + x : x;
-        private double AngleToRadians(double angle)
-        {
-            return (Math.PI / 180) * angle;
-        }
+        private float ToPositiveDegree(float x) => x < 0 ? 360 + x : Math.Abs(x);
+        private double AngleToRadians(double angle) => (Math.PI / 180) * angle;
         #endregion
 
         #region Set

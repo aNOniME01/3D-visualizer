@@ -21,6 +21,20 @@ namespace _3D_visualizer
     /// </summary>
     public partial class MainWindow : Window
     {
+        //private static string loc = "test.txt";
+        //private static string loc = "rect.txt";
+        //private static string loc = "cube.obj";
+        //private static string loc = "uvsphere.obj";
+        //private static string loc = "circle.obj";
+        //private static string loc = "testsphere.obj";
+        //private static string loc = "testsphere2.obj";
+        //private static string loc = "testsphereY.obj";
+        //private static string loc = "testsphereZ.obj";
+        private static string loc = "icosphere.obj";
+        //private static string loc = "hghrsicosphere.obj";
+        //private static string loc = "monkey.obj";
+
+
         public MainWindow()
         {
             InitializeComponent();
@@ -30,16 +44,7 @@ namespace _3D_visualizer
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             Renderer.Load(canvas);
-            //Logics.Load("test.txt");
-            //Logics.Load("rect.txt");
-            Logics.Load("cube.obj");
-            //Logics.Load("uvsphere.obj");
-            //Logics.Load("circle.obj");
-            //Logics.Load("testsphere.obj");
-            //Logics.Load("testsphere2.obj");
-            //Logics.Load("icosphere.obj");
-            //Logics.Load("hghrsicosphere.obj");
-            //Logics.Load("monkey.obj");
+            Logics.Load(loc);
         }
 
         private void Window_SizeChanged(object sender, SizeChangedEventArgs e)
@@ -51,32 +56,34 @@ namespace _3D_visualizer
             }
         }
 
-        private void canvas_MouseMove(object sender, MouseEventArgs e)
+        private void canvas_MouseDown(object sender, MouseButtonEventArgs e)
         {
-            Point mousePoint = Mouse.GetPosition(Logics.GetOrigin().Body);
-            Mesh3D mesh = Logics.GetMesh();
-            foreach (var vertex in mesh.Vertecies)
+            if (infoDisplay.IsChecked == true)
             {
-                float y, z;
-                if (Logics.GetIsPerspective())
+                Point mousePoint = Mouse.GetPosition(Logics.GetOrigin().Body);
+                Mesh3D mesh = Logics.GetMesh();
+                foreach (var vertex in mesh.Vertecies)
                 {
-                    Vector3 projected = Logics.ProjectTo2D(vertex);
-                    y = projected.Y;
-                    z = projected.Z;
-                }
-                else
-                {
-                    y = vertex.Location.Y;
-                    z = vertex.Location.Z;
-                }
+                    float y, z;
+                    if (Logics.GetIsPerspective())
+                    {
+                        Vector3 projected = Logics.ProjectTo2D(vertex);
+                        y = projected.Y;
+                        z = projected.Z;
+                    }
+                    else
+                    {
+                        y = vertex.Location.Y;
+                        z = vertex.Location.Z;
+                    }
 
-                float dis = Point3D.DistanceBetween(y, z, (float)mousePoint.X, (float)mousePoint.Y);
-                if (dis < 10) vertex.SetIsInfoDisplayed(true);
-                else vertex.SetIsInfoDisplayed(false);
+                    float dis = Point3D.DistanceBetween(y, z, (float)mousePoint.X, (float)mousePoint.Y);
+                    if (dis < 10) vertex.SetIsInfoDisplayed(true);
+                    else vertex.SetIsInfoDisplayed(false);
+                }
+                testerText.Text = $"{mousePoint.X},{mousePoint.Y}";
             }
-            testerText.Text = $"{mousePoint.X},{mousePoint.Y}";
         }
-
         #endregion
 
         #region Rotation
@@ -142,5 +149,6 @@ namespace _3D_visualizer
 
         private void CheckBox_Unchecked_1(object sender, RoutedEventArgs e) => Renderer.SetVertexInfo(false);
         #endregion
+
     }
 }

@@ -70,11 +70,11 @@ namespace _3D_visualizer
                     Z = point.Location.Z;
                 }
 
-                float F = X - MainCam.Location.X;
+                float F = MainCam.FocalLength / (MainCam.FocalLength + point.Location.X);
 
-                float yHlpr = ((Y - MainCam.Location.Y) * (F / X)) + MainCam.Location.X;
+                float yHlpr = point.Location.Y * F;
                 if (yHlpr < float.MaxValue && yHlpr > float.MinValue) Y = yHlpr;
-                float zHlpr = ((Z - MainCam.Location.Z) * (F / X)) + MainCam.Location.X;
+                float zHlpr = point.Location.Z * F;
                 if (zHlpr < float.MaxValue && zHlpr > float.MinValue) Z = zHlpr;
 
                 return new Vector3(X, Y, Z);
