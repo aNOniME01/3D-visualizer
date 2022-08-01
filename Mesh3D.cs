@@ -5,6 +5,9 @@ using System.Linq;
 using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Media;
+using System.Windows.Shapes;
 
 namespace _3D_visualizer
 {
@@ -13,27 +16,32 @@ namespace _3D_visualizer
         public Point3D Origin { get; private set; }
         public List<Point3D> Vertecies { get; private set; }
         public List<int[]> Lines { get; private set; }
+        public List<Face3D> Faces { get; private set; }
         public Vector3 Scale { get; private set; }
 
 
         #region Constructor
-        public Mesh3D(string loc)
+        public Mesh3D(string loc,Camera mainCam)
         {
             Vertecies = new List<Point3D>();
             Lines = new List<int[]>();
+
+            Faces = new List<Face3D>();
 
             Scale = new Vector3(1, 1, 1);
 
             if (loc.Split('.').Last() == "obj")
             {
-                ReadInFromObj(loc);
+                ReadInFromObj(loc,mainCam);
             }
             else
             {
-                ReadInFromTxt(loc);
+                ReadInFromTxt(loc,mainCam);
             }
+
+            OrderByX();
         }
-        private void ReadInFromObj(string loc)
+        private void ReadInFromObj(string loc,Camera mainCam)
         {
             StreamReader sr = File.OpenText(loc);
 
@@ -43,19 +51,37 @@ namespace _3D_visualizer
             {
                 string[] hlpr = sr.ReadLine().Trim().Split(' ');
 
-                Origin = new Point3D(0, 0, 0);
+                Origin = new Point3D(0, 0, 0,mainCam);
                 if (hlpr[0] != "")
                 {
                     if (hlpr[0] == "v")
                     {
-                        Vertecies.Add(new Point3D((float)Convert.ToDouble(hlpr[1]), (float)Convert.ToDouble(hlpr[2]), (float)Convert.ToDouble(hlpr[3]), Origin,index));
+                        float X = 0;
+                        float Y = 0;
+                        float Z = 0;
+                        int i = 1;
+                        bool isStay = true;
+                        while (isStay && i < hlpr.Length)
+                        {
+                            if (hlpr[i] != "")
+                            {
+                                X = (float)Convert.ToDouble(hlpr[i]);
+                                Y = (float)Convert.ToDouble(hlpr[i+1]);
+                                Z = (float)Convert.ToDouble(hlpr[i+2]);
+                                isStay = false;
+                            }
+                            i++;
+                        }
+                        Vertecies.Add(new Point3D(Z, X, Y, Origin,index,mainCam));
                         index++;
                     }
                     else if (hlpr[0] == "f")
                     {
+                        List<Point3D> face = new List<Point3D>();
+
                         for (int i = 1; i < hlpr.Length; i++)
                         {
-                            if (i == hlpr.Length-1)
+                            if (i == hlpr.Length - 1)
                             {
                                 int[] lnNew = new int[2] {  Convert.ToInt32(hlpr[1].Split('/').First()) - 1,
                                                             Convert.ToInt32(hlpr[i].Split('/').First()) - 1 };
@@ -67,9 +93,15 @@ namespace _3D_visualizer
                                 int[] lnNew = new int[2] {  Convert.ToInt32(hlpr[i].Split('/').First()) - 1,
                                                             Convert.ToInt32(hlpr[i + 1].Split('/').First()) - 1 };
 
-                                if (!SameLineExist(lnNew)) Lines.Add(lnNew);                                
+                                if (!SameLineExist(lnNew)) Lines.Add(lnNew);
                             }
+
+                            face.Add(Vertecies[Convert.ToInt32(hlpr[i].Split('/')[0]) - 1]);
+
                         }
+
+                        Faces.Add(new Face3D(face));
+
                     }
                     else if (hlpr[0] == "l")
                     {
@@ -78,7 +110,7 @@ namespace _3D_visualizer
                 }
             }
         }
-        private void ReadInFromTxt(string loc)
+        private void ReadInFromTxt(string loc,Camera mainCam)
         {
             StreamReader sr = File.OpenText(loc);
 
@@ -92,12 +124,12 @@ namespace _3D_visualizer
                     if (hlpr[0][0] == 'O')
                     {
                         hlpr[0] = hlpr[0].Trim('O');
-                        Origin = new Point3D(Convert.ToInt32(hlpr[0]), Convert.ToInt32(hlpr[1]), Convert.ToInt32(hlpr[2]));
+                        Origin = new Point3D(Convert.ToInt32(hlpr[0]), Convert.ToInt32(hlpr[1]), Convert.ToInt32(hlpr[2]), mainCam);
                     }
                     else if (hlpr[0][0] == 'P')
                     {
                         hlpr[0] = hlpr[0].Trim('P');
-                        Vertecies.Add(new Point3D(Convert.ToInt32(hlpr[0]), Convert.ToInt32(hlpr[1]), Convert.ToInt32(hlpr[2]), Origin,index));
+                        Vertecies.Add(new Point3D(Convert.ToInt32(hlpr[0]), Convert.ToInt32(hlpr[1]), Convert.ToInt32(hlpr[2]), Origin,index, mainCam));
                         index++;
                     }
                     else if (hlpr[0][0] == 'L')
@@ -123,6 +155,7 @@ namespace _3D_visualizer
         #endregion
 
         #region Rotate
+
         public void Rotate(float? x, float? y, float? z)
         {
             float X, Y, Z;
@@ -142,13 +175,52 @@ namespace _3D_visualizer
                 if(X != 0) vertex.ChangeXRotation(Origin);
                 if(Y != 0) vertex.ChangeYRotation(Origin);
                 if(Z != 0) vertex.ChangeZRotation(Origin);
-                //vertex.ChangeYRoitation(Origin);
-                //vertex.ChangeZRoitation(Origin);
-                //if(Origin.Rotation.X != 0)vertex.ChangeXRotation1(Origin);
-                //if (Origin.Rotation.Y != 0) vertex.ChangeYRoitation1(Origin);
-                //if (Origin.Rotation.Z != 0) vertex.ChangeZRoitation1(Origin);
             }
+
         }
+
+        public void RotateX(float degree)
+        {
+            Origin.SetRotation(new Vector3(degree,Origin.Rotation.Y, Origin.Rotation.Z));
+
+            ScaleMesh();
+
+            foreach (var vertex in Vertecies)
+            {
+                vertex.ChangeXRotation(Origin);
+            }
+
+            OrderByX();
+        }
+
+        public void RotateY(float degree)
+        {
+            Origin.SetRotation(new Vector3(Origin.Rotation.X,degree, Origin.Rotation.Z));
+
+            ScaleMesh();
+
+            foreach (var vertex in Vertecies)
+            {
+                vertex.ChangeYRotation(Origin);
+            }
+
+            OrderByX();
+        }
+
+        public void RotateZ(float degree)
+        {
+            Origin.SetRotation(new Vector3(Origin.Rotation.X,Origin.Rotation.Y, degree));
+
+            ScaleMesh();
+
+            foreach (var vertex in Vertecies)
+            {
+                vertex.ChangeZRotation(Origin);
+            }
+
+            OrderByX();
+        }
+
         #endregion
 
         #region Scale
@@ -163,24 +235,65 @@ namespace _3D_visualizer
 
             for (int i = 0; i < Vertecies.Count; i++)
             {
-                float xDistance = Point3D.DistanceBetween(Origin.Location.X, Vertecies[i].DefLocation.X);
-                float yDistance = Point3D.DistanceBetween(Origin.Location.Y, Vertecies[i].DefLocation.Y);
-                float zDistance = Point3D.DistanceBetween(Origin.Location.Z, Vertecies[i].DefLocation.Z);
+                Point3D vert = Vertecies[i];
+
+                float xDistance = Point3D.DistanceBetween(Origin.Location.X, vert.DefLocation.X);
+                float yDistance = Point3D.DistanceBetween(Origin.Location.Y, vert.DefLocation.Y);
+                float zDistance = Point3D.DistanceBetween(Origin.Location.Z, vert.DefLocation.Z);
                 float xScale, yScale, zScale;
 
-                if (Vertecies[i].DefLocation.X < Origin.Location.X) xScale = -(xDistance * Scale.X-xDistance);
+                if (vert.DefLocation.X < Origin.Location.X) xScale = -(xDistance * Scale.X-xDistance);
                 else xScale = (xDistance * Scale.X-xDistance);
 
-                if (Vertecies[i].DefLocation.Y < Origin.Location.Y) yScale = -(yDistance * Scale.Y-yDistance);
+                if (vert.DefLocation.Y < Origin.Location.Y) yScale = -(yDistance * Scale.Y-yDistance);
                 else yScale = (yDistance * Scale.Y-yDistance);
 
-                if (Vertecies[i].DefLocation.Z < Origin.Location.Z) zScale = -(zDistance * Scale.Z-zDistance);
+                if (vert.DefLocation.Z < Origin.Location.Z) zScale = -(zDistance * Scale.Z-zDistance);
                 else zScale = (zDistance * Scale.Z-zDistance);
 
-                Vertecies[i].ChangeLocation(new Vector3(Vertecies[i].DefLocation.X + xScale, Vertecies[i].DefLocation.Y + yScale, Vertecies[i].DefLocation.Z + zScale));
+                xScale = (vert.Location.X - (vert.DefLocation.X + xScale))* -1;
+                yScale = (vert.Location.Y - (vert.DefLocation.Y + yScale))* -1;
+                zScale = (vert.Location.Z - (vert.DefLocation.Z + zScale))* -1;
+
+                Vertecies[i].ChangeLocation(new Vector3(Vertecies[i].Location.X + xScale, Vertecies[i].Location.Y + yScale, Vertecies[i].Location.Z + zScale));
             }
 
         }
         #endregion
+
+
+        #region Operations
+
+
+        private void OrderByX()
+        {
+            foreach (var face in Faces) face.GetAvgX();
+
+            var clonedList = new List<Face3D>(Faces.Count);
+
+            for (int i = 0; i < Faces.Count; i++)
+            {
+                var item = Faces[i];
+                var currentIndex = i;
+
+                while (currentIndex > 0 && clonedList[currentIndex - 1].AvgX < item.AvgX)
+                {
+                    currentIndex--;
+                }
+
+                clonedList.Insert(currentIndex, item);
+            }
+
+            Faces = clonedList;
+        }
+
+        #endregion
+        public void Refresh()
+        {
+            foreach (var vert in Vertecies)
+            {
+                vert.ProjectTo2D();
+            }
+        }
     }
 }

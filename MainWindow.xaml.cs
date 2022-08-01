@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Numerics;
 using System.Text;
-using System.Threading.Tasks;
+using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -13,6 +14,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using System.Windows.Threading;
 
 namespace _3D_visualizer
 {
@@ -21,19 +23,8 @@ namespace _3D_visualizer
     /// </summary>
     public partial class MainWindow : Window
     {
-        //private static string loc = "test.txt";
-        //private static string loc = "rect.txt";
-        //private static string loc = "cube.obj";
-        //private static string loc = "uvsphere.obj";
-        //private static string loc = "circle.obj";
-        //private static string loc = "testsphere.obj";
-        //private static string loc = "testsphere2.obj";
-        //private static string loc = "testsphereY.obj";
-        //private static string loc = "testsphereZ.obj";
-        private static string loc = "icosphere.obj";
-        //private static string loc = "hghrsicosphere.obj";
-        //private static string loc = "monkey.obj";
-
+        private static string loc = "test.txt";
+        private static DispatcherTimer spinUpdate;
 
         public MainWindow()
         {
@@ -41,10 +32,44 @@ namespace _3D_visualizer
         }
 
         #region Events
+
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            Renderer.Load(canvas);
-            Logics.Load(loc);
+            spinUpdate = new DispatcherTimer();
+            spinUpdate.Interval = TimeSpan.FromMilliseconds(40);
+            spinUpdate.Tick += spin_Tick;
+
+            //load obj selector
+            DirectoryInfo dirInfo = new DirectoryInfo(System.IO.Path.GetFullPath("."));
+            FileInfo[] files = dirInfo.GetFiles("*.*", SearchOption.AllDirectories);
+
+            foreach (FileInfo file in files)
+            {
+                if (file.Extension == ".obj" || file.Extension == ".txt")
+                {
+                    string content = "";
+                    StreamReader sr = File.OpenText(file.FullName);
+                    while (!sr.EndOfStream && content == "")
+                    {
+                        string[] hlpr = sr.ReadLine().Trim().Split(' ');
+                        if (hlpr[0] == "o")
+                        {
+                            string[] name = hlpr[1].Split('_');
+                            if (name.Length != 1 && name[1][0] == '(') content = name[0] + name[1];
+                            else content = name[0];
+                        }
+                    }
+                    sr.Close();
+
+                    ComboBoxItem item = new ComboBoxItem();
+                    item.Content = content;
+                    item.Tag = file.Name;
+
+                    objSelector.Items.Add(item);
+                }
+            }
+
+            StartVisualizer();
         }
 
         private void Window_SizeChanged(object sender, SizeChangedEventArgs e)
@@ -67,9 +92,8 @@ namespace _3D_visualizer
                     float y, z;
                     if (Logics.GetIsPerspective())
                     {
-                        Vector3 projected = Logics.ProjectTo2D(vertex);
-                        y = projected.Y;
-                        z = projected.Z;
+                        y = (float)vertex.ProjectedLocation.X;
+                        z = (float)vertex.ProjectedLocation.Y;
                     }
                     else
                     {
@@ -77,13 +101,66 @@ namespace _3D_visualizer
                         z = vertex.Location.Z;
                     }
 
-                    float dis = Point3D.DistanceBetween(y, z, (float)mousePoint.X, (float)mousePoint.Y);
+                    float dis = Point3D.DistanceBetween(y, z, (float)mousePoint.X, (float)mousePoint.Y * -1);
                     if (dis < 10) vertex.SetIsInfoDisplayed(true);
                     else vertex.SetIsInfoDisplayed(false);
                 }
                 testerText.Text = $"{mousePoint.X},{mousePoint.Y}";
             }
         }
+
+        private void objSelector_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            ComboBoxItem typeItem = (ComboBoxItem)objSelector.SelectedItem;
+            loc = typeItem.Tag.ToString();
+            StartVisualizer();
+        }
+
+        #endregion
+
+        #region Display
+
+        private void StartVisualizer()
+        {
+            Renderer.Load(canvas);
+            Logics.Load(loc);
+
+            vertexDisplay.IsChecked = false;
+            infoDisplay.IsChecked = false;
+
+            lineDisplay.IsChecked = true;
+
+            perspCheck.IsChecked = false;
+
+            spinCheck.IsChecked = false;
+
+            try
+            {
+                spinUpdate.Stop();
+            }
+            catch { }
+
+            RotXSlider.Value = 0;
+            RotYSlider.Value = 0;
+            RotZSlider.Value = 0;
+            if (loc.Split('.').Last() == "obj") ScaleSlider.Value = 10;
+        }
+
+        private void vertexDisplay_Checked(object sender, RoutedEventArgs e) => Logics.DisplayVerts(true);
+
+        private void vertexDisplay_Unchecked(object sender, RoutedEventArgs e) => Logics.DisplayVerts(false);
+
+        private void lineDisplay_Checked(object sender, RoutedEventArgs e)
+        {
+            if (IsLoaded) Logics.DisplayLines(true);
+        }
+
+        private void lineDisplay_Unchecked(object sender, RoutedEventArgs e) => Logics.DisplayLines(false);
+
+        private void faceDisplay_Checked(object sender, RoutedEventArgs e) => Logics.DisplayFaces(true);
+
+        private void faceDisplay_Unchecked(object sender, RoutedEventArgs e) => Logics.DisplayFaces(false);
+
         #endregion
 
         #region Rotation
@@ -92,7 +169,7 @@ namespace _3D_visualizer
             if (IsLoaded)
             {
                 Xrot.Text = $"{RotXSlider.Value}";
-                Logics.RotateMesh((int)RotXSlider.Value,null, null);
+                Logics.RotateMesh((float)RotXSlider.Value, null, null);
                 Logics.Refresh();
             }
         }
@@ -102,7 +179,7 @@ namespace _3D_visualizer
             if (IsLoaded)
             {
                 Yrot.Text = $"{RotYSlider.Value}";
-                Logics.RotateMesh(null, (int)RotYSlider.Value, null);
+                Logics.RotateMesh(null, (float)RotYSlider.Value, null);
                 Logics.Refresh();
             }
 
@@ -113,11 +190,23 @@ namespace _3D_visualizer
             if (IsLoaded)
             {
                 Zrot.Text = $"{RotZSlider.Value}";
-                Logics.RotateMesh(null, null, (int)RotZSlider.Value);
+                Logics.RotateMesh(null, null, (float)RotZSlider.Value);
                 Logics.Refresh();
             }
 
         }
+
+        private void spinCheck_Checked(object sender, RoutedEventArgs e) => spinUpdate.Start();
+
+        private void spinCheck_Unchecked(object sender, RoutedEventArgs e) => spinUpdate.Stop();
+
+        void spin_Tick(object sender, EventArgs e)
+        {
+            if (RotZSlider.Value == 360) RotZSlider.Value = 0;
+            else RotZSlider.Value += 4;
+            Logics.RotateMesh(null,null,(float)RotZSlider.Value);
+        }
+
         #endregion
 
         #region Scale

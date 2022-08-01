@@ -12,7 +12,9 @@ namespace _3D_visualizer
 {
     internal class Logics
     {
-        private static bool IsPerspective;
+        private static bool displayVerts;
+        private static bool displayLines;
+        private static bool displayFaces;
 
         private static Camera MainCam;
         private static Mesh3D Mesh;
@@ -21,11 +23,13 @@ namespace _3D_visualizer
         #region Logic
         public static void Load(string loc)
         {
-            IsPerspective = false;
+            displayVerts = false;
+            displayLines = true;
+            displayFaces = false;
 
             MainCam = new Camera(-4, 0,0);
 
-            Mesh = new Mesh3D(loc);
+            Mesh = new Mesh3D(loc,MainCam);
 
             if (loc.Split('.').Last() == "obj") ScaleMesh(10);
             else ScaleMesh(1);
@@ -35,54 +39,31 @@ namespace _3D_visualizer
         public static void Refresh()
         {
             Renderer.ClearCanvas();
-            int num = 0;
-            foreach (var vertex in Mesh.Vertecies)
+            if (displayFaces)
             {
-                num++;
-                Renderer.AddPoint(vertex,num);
+                foreach (var face in Mesh.Faces)
+                {
+                    Renderer.AddFace(face);
+                }
             }
-            foreach (var line in Mesh.Lines)
+            if (displayVerts)
             {
-                Renderer.AddLine(ProjectTo2D(Mesh.Vertecies[line[0]]), ProjectTo2D(Mesh.Vertecies[line[1]]));
+                int num = 0;
+                foreach (var vertex in Mesh.Vertecies)
+                {
+                    num++;
+                    Renderer.AddPoint(vertex, num);
+                }
+            }
+            if (displayLines)
+            {
+                foreach (var line in Mesh.Lines)
+                {
+                    Renderer.AddLine(Mesh.Vertecies[line[0]].ProjectedLocation, Mesh.Vertecies[line[1]].ProjectedLocation);
+                }
             }
             Renderer.AddOriginPoint(Mesh.Origin);
             Renderer.AddMeshInfo(Mesh);
-        }
-        #endregion
-
-        #region Projection
-        public static Vector3 ProjectTo2D(Point3D point)
-        {
-            if (IsPerspective)
-            {
-                float X, Y, Z;
-                if (point.Location.X == 0 && point.Location.Y == 0 && point.Location.Z == 0)
-                {
-                    return point.Location;
-                    //X = 1;
-                    //Y = 1;
-                    //Z = 1;
-                }
-                else
-                {
-                    X = point.Location.X;
-                    Y = point.Location.Y;
-                    Z = point.Location.Z;
-                }
-
-                float F = MainCam.FocalLength / (MainCam.FocalLength + point.Location.X);
-
-                float yHlpr = point.Location.Y * F;
-                if (yHlpr < float.MaxValue && yHlpr > float.MinValue) Y = yHlpr;
-                float zHlpr = point.Location.Z * F;
-                if (zHlpr < float.MaxValue && zHlpr > float.MinValue) Z = zHlpr;
-
-                return new Vector3(X, Y, Z);
-            }
-            else
-            {
-                return new Vector3(point.Location.X, point.Location.Y, point.Location.Z);
-            }
         }
         #endregion
 
@@ -94,25 +75,51 @@ namespace _3D_visualizer
         #endregion
 
         #region Rotate
+
         public static void RotateMesh(float? x,float? y, float? z)
         {
-            Mesh.Rotate(x,y,z);
+            if (x != null) Mesh.RotateX((float)x);
+            else if (y != null) Mesh.RotateY((float)y);
+            else Mesh.RotateZ((float)z);
+
             Refresh();
         }
+
         #endregion
 
         #region Get
         public static Point3D GetOrigin() => Mesh.Origin;
         public static Mesh3D GetMesh() => Mesh;
-        public static bool GetIsPerspective() => IsPerspective;
+        public static bool GetIsPerspective() => MainCam.GetPerspective();
         #endregion
 
         #region Set
+
         public static void PerspectiveTo(bool isPerspective)
         {
-            IsPerspective = isPerspective;
+            MainCam.SetPerspective(isPerspective);
+            Mesh.Refresh();
             Refresh();
         }
+
+        public static void DisplayVerts(bool dispVerts)
+        {
+            displayVerts = dispVerts;
+            Refresh();
+        }
+
+        public static void DisplayLines(bool dispLines)
+        {
+            displayLines = dispLines;
+            Refresh();
+        }
+
+        public static void DisplayFaces(bool dispFaces)
+        {
+            displayFaces = dispFaces;
+            Refresh();
+        }
+        
         #endregion
     }
 }

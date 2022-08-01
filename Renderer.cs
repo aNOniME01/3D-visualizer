@@ -4,6 +4,7 @@ using System.Linq;
 using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Shapes;
@@ -29,13 +30,13 @@ namespace _3D_visualizer
         #endregion
 
         #region Line
-        public static void AddLine(Vector3 p1, Vector3 p2)
+        public static void AddLine(Point p1, Point p2)
         {
             Line line = new Line();
-            line.X1 = p1.Y + WWidth/2;
-            line.Y1 = p1.Z + WHeight / 2;
-            line.X2 = p2.Y + WWidth / 2;
-            line.Y2 = p2.Z + WHeight / 2;
+            line.X1 = p1.X + WWidth/2;
+            line.Y1 = WHeight - (p1.Y + WHeight / 2);
+            line.X2 = p2.X + WWidth / 2;
+            line.Y2 = WHeight - (p2.Y + WHeight / 2);
 
             line.StrokeThickness = 1;
             line.Stroke = Brushes.Lime;
@@ -57,14 +58,34 @@ namespace _3D_visualizer
         }
         #endregion
 
+        #region Face
+
+        public static void AddFace(Face3D face)
+        {
+            Polygon faceMesh = new Polygon();
+
+            foreach (var vert in face.Points)
+            {
+                faceMesh.Points.Add(new Point( vert.ProjectedLocation.X + WWidth / 2,WHeight - (vert.ProjectedLocation.Y + WHeight / 2)));
+            }
+
+            faceMesh.StrokeThickness = 1;
+            faceMesh.Fill = face.FColor;
+
+
+            canvas.Children.Add(faceMesh);
+        }
+
+        #endregion
+
         #region Point
         public static void AddPoint(Point3D point,int num) 
         {
 
-            Vector3 projected = Logics.ProjectTo2D(point);
+            Point projected = point.ProjectedLocation;
 
-            Canvas.SetLeft(point.Body, projected.Y - (point.Body.Width/2) + WWidth/2);
-            Canvas.SetTop(point.Body, projected.Z - (point.Body.Height / 2) + WHeight/2);
+            Canvas.SetLeft(point.Body, projected.X - (point.Body.Width/2) + WWidth/2);
+            Canvas.SetBottom(point.Body, projected.Y - (point.Body.Height / 2) + WHeight/2);
 
             try
             {
@@ -76,10 +97,10 @@ namespace _3D_visualizer
 
         public static void AddOriginPoint(Point3D point) 
         {
-            Vector3 projected = Logics.ProjectTo2D(point);
+            Point projected = point.ProjectedLocation;
 
-            Canvas.SetLeft(point.Body, projected.Y - (point.Body.Width / 2) + WWidth / 2);
-            Canvas.SetTop(point.Body, projected.Z - (point.Body.Height / 2) + WHeight / 2);
+            Canvas.SetLeft(point.Body, projected.X - (point.Body.Width / 2) + WWidth / 2);
+            Canvas.SetBottom(point.Body, projected.Y - (point.Body.Height / 2) + WHeight / 2);
 
             try
             {
@@ -106,12 +127,12 @@ namespace _3D_visualizer
             
             /*if(point.Location.X <= 0)*/vertexInfo.Text = point.IsInfoDisplayed ? $"{point.VertIndex} \n {GetVertexInfo(point)}" 
                                                     : $"{point.VertIndex} \n";
-            if (point.Location.X >= 0) vertexInfo.Foreground = Brushes.DarkRed;
+            if (point.Location.X <= 0) vertexInfo.Foreground = Brushes.DarkRed;
             else vertexInfo.Foreground = color;
 
-            Vector3 projected = Logics.ProjectTo2D(point);
-            Canvas.SetLeft(vertexInfo, projected.Y + WWidth / 2);
-            Canvas.SetTop(vertexInfo, projected.Z + WHeight / 2);
+            Point projected = point.ProjectedLocation;
+            Canvas.SetLeft(vertexInfo, projected.X + WWidth / 2 -7);
+            Canvas.SetBottom(vertexInfo, projected.Y + WHeight / 2 -25);
 
             canvas.Children.Add(vertexInfo);
         }
@@ -126,12 +147,13 @@ namespace _3D_visualizer
         {
             TextBlock meshInfo = new TextBlock();
             meshInfo.Text = $"vertex count: {mesh.Vertecies.Count} \n" +
-                $"line count: {mesh.Lines.Count}";
+                $"line count: {mesh.Lines.Count} \n" +
+                $"face count: {mesh.Faces.Count}";
             meshInfo.FontSize = 10;
             meshInfo.Foreground = Brushes.Lime;
 
             Canvas.SetLeft(meshInfo, 2);
-            Canvas.SetBottom(meshInfo, WHeight - 28);
+            Canvas.SetBottom(meshInfo, WHeight - 40);
             canvas.Children.Add(meshInfo);
         }
         #endregion

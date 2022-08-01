@@ -15,29 +15,52 @@
         <Canvas x:Name="canvas"  Grid.Column="0" Background="Black" MouseDown="canvas_MouseDown"/>
         
         <StackPanel Grid.Column="1">
-            
+
+            <ComboBox x:Name="objSelector" SelectionChanged="objSelector_SelectionChanged"/>
+
             <StackPanel Orientation="Horizontal">
-                <CheckBox x:Name="infoDisplay" Checked="CheckBox_Checked"  Unchecked="CheckBox_Unchecked_1"/>
-                <TextBlock Text="show vertex info" Margin="10,0,0,0"/>
+                <CheckBox x:Name="vertexDisplay" Checked="vertexDisplay_Checked"  Unchecked="vertexDisplay_Unchecked"/>
+                <TextBlock Text="show vertecies" Margin="10,0,0,0"/>
             </StackPanel>
             
             <StackPanel Orientation="Horizontal">
-                <CheckBox Checked="persp_Checked" Unchecked="CheckBox_Unchecked"/>
-                <TextBlock Text="Perspective" Margin="10,0,0,0"/>
+                <CheckBox x:Name="infoDisplay" Checked="CheckBox_Checked"  Unchecked="CheckBox_Unchecked_1"/>
+                <TextBlock Text="show vertex info" Margin="10,0,0,10"/>
+            </StackPanel>
+            
+            <StackPanel Orientation="Horizontal">
+                <CheckBox x:Name="lineDisplay" IsChecked="True" Checked="lineDisplay_Checked"  Unchecked="lineDisplay_Unchecked"/>
+                <TextBlock Text="show lines" Margin="10,0,0,10"/>
+            </StackPanel>
+            
+            <StackPanel Orientation="Horizontal">
+                <CheckBox x:Name="faceDisplay" Checked="faceDisplay_Checked"  Unchecked="faceDisplay_Unchecked"/>
+                <TextBlock Text="show faces" Margin="10,0,0,10"/>
+            </StackPanel>
+            
+            <StackPanel Orientation="Horizontal">
+                <CheckBox x:Name="perspCheck" Checked="persp_Checked" Unchecked="CheckBox_Unchecked"/>
+                <TextBlock Text="Perspective" Margin="10,0,0,10"/>
             </StackPanel>
             
             <TextBlock Text="X Rotation" HorizontalAlignment="Center"/>
             <Slider x:Name="RotXSlider" Minimum="0" Maximum="360" TickFrequency="1" IsSnapToTickEnabled="True" Value="0" ValueChanged="RotXSlider_ValueChanged"/>
-            <TextBlock Text="" x:Name="Xrot"/>
+            <TextBlock Text="0" x:Name="Xrot" HorizontalAlignment="Center"/>
             
             <TextBlock Text="Y Rotation" HorizontalAlignment="Center"/>
             <Slider x:Name="RotYSlider" Minimum="0" Maximum="360" TickFrequency="1" IsSnapToTickEnabled="True" Value="0" ValueChanged="RotYSlider_ValueChanged"/>
-            <TextBlock Text="" x:Name="Yrot"/>
-            
+            <TextBlock Text="0" x:Name="Yrot" HorizontalAlignment="Center"/>
+
             <TextBlock Text="Z Rotation" HorizontalAlignment="Center"/>
             <Slider x:Name="RotZSlider" Minimum="0" Maximum="360" TickFrequency="1" IsSnapToTickEnabled="True" Value="0" ValueChanged="RotZSlider_ValueChanged"/>
-            <TextBlock Text="" x:Name="Zrot"/>
-           
+            
+            <StackPanel Orientation="Horizontal">
+                <CheckBox x:Name="spinCheck" Checked="spinCheck_Checked"  Unchecked="spinCheck_Unchecked"/>
+                <TextBlock Text="Spin" Margin="10,0,0,0"/>
+                <TextBlock Text="0" x:Name="Zrot" Margin="20,0,0,0"/>
+            </StackPanel>
+
+
             <TextBlock Text="Scale" HorizontalAlignment="Center"/>
             <Slider x:Name="ScaleSlider" Minimum="1" Maximum="100" TickFrequency="1" IsSnapToTickEnabled="True" Value="0" ValueChanged="ScaleSlider_ValueChanged"/>
             <TextBlock Text="" x:Name="scalerText"/>

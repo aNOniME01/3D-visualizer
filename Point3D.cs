@@ -4,6 +4,7 @@ using System.Linq;
 using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Media;
 using System.Windows.Shapes;
 
@@ -15,6 +16,7 @@ namespace _3D_visualizer
 
         public Vector3 DefLocation { get; private set; }
         public Vector3 Location { get; private set; }
+        public Point ProjectedLocation { get; private set; }
 
         public Vector3 QuadrantAngle { get; private set; }
         public Vector3 Rotation { get; private set; }
@@ -22,66 +24,48 @@ namespace _3D_visualizer
         public Rectangle Body { get; private set; }
         public bool IsInfoDisplayed { get; private set; }
 
+        private Camera MainCam;
+
 
         #region Constructor
-        public Point3D(float x, float y, float z, Point3D origin,int index)
+
+        public Point3D(float x, float y, float z, Point3D origin,int index, Camera mainCam)
         {
+            MainCam = mainCam;
+
             this.VertIndex = index;
 
             DefLocation = new Vector3(x, y, z);
             Location = new Vector3(DefLocation.X, DefLocation.Y, DefLocation.Z);
+            ProjectTo2D();
 
-
-            float X, Y, Z;
-            float xAngle = ToPositiveDegree((float)(Math.Atan2(y - origin.Location.Y, z - origin.Location.Z) * (180 / Math.PI)));
-            if (xAngle <= 90) X = 0;
-            else if (xAngle < 180) X = 270;
-            else if (xAngle <= 270) X = 180;
-            else X = 90;
-
-            float yAngle = ToPositiveDegree((float)(Math.Atan2(x - origin.Location.X, z - origin.Location.Z) * (180 / Math.PI)));
-            if (yAngle <= 90) Y = 0;
-            else if (yAngle < 180) Y = 270;
-            else if (yAngle <= 270) Y = 180;
-            else Y = 90;
-
-            float zAngle = ToPositiveDegree(Flip((float)(Math.Atan2(y - origin.Location.Y, x - origin.Location.X) * (180 / Math.PI))));
-            if (zAngle <= 90) Z = 0;
-            else if (zAngle < 180) Z = 270;
-            else if (zAngle <= 270) Z = 180;
-            else Z = 90;
-
-            QuadrantAngle = new Vector3(X, Y, Z);
-            Rotation = new Vector3(X, Y, Z);
+            QuadrantAngle = CalculateQuadrantAngle(origin);
+            Rotation = new Vector3(QuadrantAngle.X, QuadrantAngle.Y, QuadrantAngle.Z);
 
             Body = new Rectangle();
-            Body.Height = 5;
-            Body.Width = 5;
+            Body.Height = 3;
+            Body.Width = 3;
             Body.Fill = Brushes.LimeGreen;
 
             IsInfoDisplayed = false;
-
+            MainCam = mainCam;
         }
-        public Point3D(float x, float y, float z)
+        public Point3D(float x, float y, float z,Camera mainCam)
         {
+            MainCam = mainCam;
+
             VertIndex = 0;
 
             DefLocation = new Vector3(x, y, z);
             Location = new Vector3(DefLocation.X, DefLocation.Y, DefLocation.Z);
+            ProjectTo2D();
 
-
-            float X, Y, Z;
-
-            X = 0;
-            Y = 0;
-            Z = 0;
-
-            QuadrantAngle = new Vector3(X, Y, Z);
-            Rotation = new Vector3(X, Y, Z);
+            QuadrantAngle = new Vector3(0, 0, 0);
+            Rotation = new Vector3(0, 0, 0);
 
             Body = new Rectangle();
-            Body.Height = 5;
-            Body.Width = 5;
+            Body.Height = 3;
+            Body.Width = 3;
             Body.Fill = Brushes.Red;
 
             IsInfoDisplayed = false;
@@ -89,13 +73,17 @@ namespace _3D_visualizer
         #endregion
 
         #region Location
+
         public void ChangeLocation(Vector3 loc)
         {
             Location = new Vector3(loc.X,loc.Y,loc.Z);
+            ProjectTo2D();
         }
+
         #endregion
 
         #region Rotation
+
         public void ChangeXRotation(Point3D origin)
         {
             float rX = origin.Rotation.X;
@@ -123,7 +111,9 @@ namespace _3D_visualizer
             }
 
             Location = new Vector3(X, Y, Z);
+            ProjectTo2D();
         }
+
         public void ChangeYRotation(Point3D origin)
         {
             float rY = origin.Rotation.Y;
@@ -151,7 +141,9 @@ namespace _3D_visualizer
             }
 
             Location = new Vector3(X, Y, Z);
+            ProjectTo2D();
         }
+
         public void ChangeZRotation(Point3D origin)
         {
             float rZ = origin.Rotation.Z;
@@ -174,16 +166,47 @@ namespace _3D_visualizer
             if (QuadrantAngle.Z == 270 || QuadrantAngle.Z == 90)
             {
                 float hlpr = X * -1;
-                X = Y;
+                X = Y * -1;
                 Y = hlpr;
             }
 
             Location = new Vector3(X, Y, Z);
+            ProjectTo2D();
         }
+
         public void SetRotation(Vector3 rot)
         {
             Rotation = new Vector3(rot.X, rot.Y, rot.Z);
         }
+
+        #endregion
+
+        #region Projection
+
+        public void ProjectTo2D()
+        {
+            if (MainCam.Perspective)
+            {
+                float Y, Z;
+                Y = Location.Y;
+                Z = Location.Z;
+
+                float F = MainCam.FocalLength / (MainCam.FocalLength + Location.X);
+
+                float yHlpr = Location.Y * F;
+                if (yHlpr < float.MaxValue && yHlpr > float.MinValue) Y = yHlpr;
+                float zHlpr = Location.Z * F;
+                if (zHlpr < float.MaxValue && zHlpr > float.MinValue) Z = zHlpr;
+
+                ProjectedLocation = new Point(Y, Z);
+
+            }
+            else
+            {
+                ProjectedLocation = new Point(Location.Y, Location.Z);
+            }
+        }
+
         #endregion
 
         #region Operations
@@ -194,14 +217,48 @@ namespace _3D_visualizer
         private float Flip(float x) => x < 0 ? -(180 + x) : 180 - x;
         private float ToPositiveDegree(float x) => x < 0 ? 360 + x : Math.Abs(x);
         private double AngleToRadians(double angle) => (Math.PI / 180) * angle;
+
+        private Vector3 CalculateQuadrantAngle(Point3D origin)
+        {
+            float X, Y, Z;
+            float xAngle = ToPositiveDegree((float)(Math.Atan2(Location.Y - origin.Location.Y, Location.Z - origin.Location.Z) * (180 / Math.PI)));
+            if (xAngle <= 90) X = 0;
+            else if (xAngle < 180) X = 270;
+            else if (xAngle <= 270) X = 180;
+            else X = 90;
+
+            float yAngle = ToPositiveDegree((float)(Math.Atan2(Location.X - origin.Location.X, Location.Z - origin.Location.Z) * (180 / Math.PI)));
+            if (yAngle <= 90) Y = 0;
+            else if (yAngle < 180) Y = 270;
+            else if (yAngle <= 270) Y = 180;
+            else Y = 90;
+
+            float zAngle = ToPositiveDegree(Flip((float)(Math.Atan2(Location.Y - origin.Location.Y, Location.X - origin.Location.X) * (180 / Math.PI))));
+            if (zAngle <= 90) Z = 0;
+            else if (zAngle < 180) Z = 270;
+            else if (zAngle <= 270) Z = 180;
+            else Z = 90;
+
+            return new Vector3(X, Y, Z);
+
+        }
+
         #endregion
 
         #region Set
+
         public void SetIsInfoDisplayed(bool isInfoDisplayed)
         {
             IsInfoDisplayed = isInfoDisplayed;
             Logics.Refresh();
         }
+
+        public void SetQuadrantAngle(Point3D origin)
+        {
+            Vector3 newAngle = new Vector3(QuadrantAngle.X + origin.Rotation.X, QuadrantAngle.Y + origin.Rotation.Y, QuadrantAngle.Z + origin.Rotation.Z);
+            QuadrantAngle = newAngle;
+        }
+
         #endregion
     }
 }
