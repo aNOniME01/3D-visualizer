@@ -17,16 +17,20 @@ namespace _3D_visualizer
         public List<Point3D> Vertecies { get; private set; }
         public List<int[]> Lines { get; private set; }
         public List<Face3D> Faces { get; private set; }
+        public List<Vector3> FaceNormals { get; private set; }
+
         public Vector3 Scale { get; private set; }
 
 
         #region Constructor
+
         public Mesh3D(string loc,Camera mainCam)
         {
             Vertecies = new List<Point3D>();
             Lines = new List<int[]>();
 
             Faces = new List<Face3D>();
+            FaceNormals = new List<Vector3>();
 
             Scale = new Vector3(1, 1, 1);
 
@@ -107,6 +111,10 @@ namespace _3D_visualizer
                     {
                         Lines.Add( new int[2] {  Convert.ToInt32(hlpr[1]) - 1, Convert.ToInt32(hlpr[2]) - 1 });
                     }
+                    else if (hlpr[0] == "vn")
+                    {
+                        FaceNormals.Add(new Vector3((float)Convert.ToDouble(hlpr[1]), (float)Convert.ToDouble(hlpr[2]), (float)Convert.ToDouble(hlpr[3])));
+                    }
                 }
             }
         }
@@ -183,14 +191,14 @@ namespace _3D_visualizer
         {
             Origin.SetRotation(new Vector3(degree,Origin.Rotation.Y, Origin.Rotation.Z));
 
-            ScaleMesh();
+            //ScaleMesh();
 
             foreach (var vertex in Vertecies)
             {
-                vertex.ChangeXRotation(Origin);
+                vertex.ChangeXRotation2(Origin);
             }
 
-            OrderByX();
+            //OrderByX();
         }
 
         public void RotateY(float degree)
@@ -264,30 +272,32 @@ namespace _3D_visualizer
 
         #region Operations
 
-
         private void OrderByX()
         {
             foreach (var face in Faces) face.GetAvgX();
 
             var clonedList = new List<Face3D>(Faces.Count);
+            var normalList = new List<Vector3>(FaceNormals.Count);
 
             for (int i = 0; i < Faces.Count; i++)
             {
-                var item = Faces[i];
                 var currentIndex = i;
 
-                while (currentIndex > 0 && clonedList[currentIndex - 1].AvgX < item.AvgX)
+                while (currentIndex > 0 && clonedList[currentIndex - 1].AvgX < Faces[i].AvgX)
                 {
                     currentIndex--;
                 }
 
-                clonedList.Insert(currentIndex, item);
+                clonedList.Insert(currentIndex, Faces[i]);
+                //normalList.Insert(currentIndex, FaceNormals[i]);
             }
 
             Faces = clonedList;
+            FaceNormals = normalList;
         }
 
         #endregion
+
         public void Refresh()
         {
             foreach (var vert in Vertecies)

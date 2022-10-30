@@ -36,7 +36,7 @@ namespace _3D_visualizer
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             spinUpdate = new DispatcherTimer();
-            spinUpdate.Interval = TimeSpan.FromMilliseconds(40);
+            spinUpdate.Interval = TimeSpan.FromMilliseconds(20);
             spinUpdate.Tick += spin_Tick;
 
             //load obj selector
@@ -47,28 +47,33 @@ namespace _3D_visualizer
             {
                 if (file.Extension == ".obj" || file.Extension == ".txt")
                 {
-                    string content = "";
+                    //Get object name
+                    string objectName = "";
                     StreamReader sr = File.OpenText(file.FullName);
-                    while (!sr.EndOfStream && content == "")
+                    while (!sr.EndOfStream && objectName == "")
                     {
                         string[] hlpr = sr.ReadLine().Trim().Split(' ');
                         if (hlpr[0] == "o")
                         {
                             string[] name = hlpr[1].Split('_');
-                            if (name.Length != 1 && name[1][0] == '(') content = name[0] + name[1];
-                            else content = name[0];
+                            if (name.Length != 1 && name[1][0] == '(') objectName = name[0] + name[1];
+                            else objectName = name[0];
                         }
                     }
                     sr.Close();
 
                     ComboBoxItem item = new ComboBoxItem();
-                    item.Content = content;
+                    item.Content = objectName;
                     item.Tag = file.Name;
 
                     objSelector.Items.Add(item);
                 }
             }
 
+            disp.Height = Height;
+            disp.Width = Width - 150;
+            Renderer.Load(disp, grd);
+            
             StartVisualizer();
         }
 
@@ -76,7 +81,7 @@ namespace _3D_visualizer
         {
             if (IsLoaded)
             {
-                Renderer.Load(canvas);
+                Renderer.Load(disp,grd);
                 Logics.Refresh();
             }
         }
@@ -85,8 +90,17 @@ namespace _3D_visualizer
         {
             if (infoDisplay.IsChecked == true)
             {
-                Point mousePoint = Mouse.GetPosition(Logics.GetOrigin().Body);
+                Point mousePoint = Mouse.GetPosition(disp);
+
                 Mesh3D mesh = Logics.GetMesh();
+                int index = 0;
+                bool done = false;
+
+                while (!done && index < mesh.Vertecies.Count)
+                {
+
+                }
+
                 foreach (var vertex in mesh.Vertecies)
                 {
                     float y, z;
@@ -116,19 +130,28 @@ namespace _3D_visualizer
             StartVisualizer();
         }
 
+        private void DragOver(object sender, DragEventArgs e)
+        {
+            if (CheckDrop())
+            {
+                Mouse.OverrideCursor = Cursors.Wait;
+            }
+        }
+
         #endregion
 
         #region Display
 
         private void StartVisualizer()
         {
-            Renderer.Load(canvas);
             Logics.Load(loc);
 
             vertexDisplay.IsChecked = false;
             infoDisplay.IsChecked = false;
 
             lineDisplay.IsChecked = true;
+
+            faceDisplay.IsChecked = false;
 
             perspCheck.IsChecked = false;
 
@@ -203,8 +226,7 @@ namespace _3D_visualizer
         void spin_Tick(object sender, EventArgs e)
         {
             if (RotZSlider.Value == 360) RotZSlider.Value = 0;
-            else RotZSlider.Value += 4;
-            Logics.RotateMesh(null,null,(float)RotZSlider.Value);
+            else RotZSlider.Value += 2;
         }
 
         #endregion
@@ -239,5 +261,38 @@ namespace _3D_visualizer
         private void CheckBox_Unchecked_1(object sender, RoutedEventArgs e) => Renderer.SetVertexInfo(false);
         #endregion
 
+        #region Cheks
+
+        private static bool CheckDrop()
+        {
+            return true;
+        }
+
+        #endregion
+
+        #region Operations
+
+        private void SortByDistance(ref List<Point3D> vertecies)
+        {
+            for (int i = 0; i < vertecies.Count; i++)
+            {
+                for (int j = i+1; j < vertecies.Count-1; j++)
+                {
+                    if (vertecies[i].Location.X < vertecies[j].Location.X)
+                    {
+                        Point3D hlpr = vertecies[i];
+                        vertecies[i] = vertecies[j];
+                        vertecies[j] = hlpr;
+                    }
+                }
+            }
+        }
+
+        #endregion
+
+        private void SaveButton_Click(object sender, RoutedEventArgs e)
+        {
+            Renderer.SaveImage();
+        }
     }
 }

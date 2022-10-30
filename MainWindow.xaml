@@ -4,15 +4,16 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:_3D_visualizer"
-        mc:Ignorable="d" Loaded="Window_Loaded" SizeChanged="Window_SizeChanged"
+        mc:Ignorable="d" Loaded="Window_Loaded" SizeChanged="Window_SizeChanged" 
         Title="MainWindow" Height="450" Width="800" >
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition />
+            <ColumnDefinition/>
             <ColumnDefinition Width="150"/>
         </Grid.ColumnDefinitions>
-
-        <Canvas x:Name="canvas"  Grid.Column="0" Background="Black" MouseDown="canvas_MouseDown"/>
+        <Grid x:Name="grd" Grid.Column="0" Background="Black">
+            <Image x:Name="disp"/>
+        </Grid>
         
         <StackPanel Grid.Column="1">
 
@@ -66,7 +67,9 @@
             <TextBlock Text="" x:Name="scalerText"/>
             
             <TextBlock Text="" x:Name="testerText"/>
-       
+
+            <Button x:Name="SaveButton" Content="Save image" Click="SaveButton_Click"
+                    Height="20" Width="110"/>
         </StackPanel>
     </Grid>
 </Window>

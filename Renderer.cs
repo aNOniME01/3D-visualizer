@@ -1,12 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Drawing;
+using System.Drawing.Imaging;
+using System.IO;
 using System.Linq;
-using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
-using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Media;
+using System.Windows.Media.Imaging;
+using System.Windows.Media.Media3D;
 using System.Windows.Shapes;
 
 namespace _3D_visualizer
@@ -15,126 +18,112 @@ namespace _3D_visualizer
     {
         private static double WHeight;
         private static double WWidth;
-        private static Canvas canvas;
+
+        private static System.Windows.Controls.Image image;
+        private static Grid grid;
+        private static TextBlock meshInfo;
+
+
+        private static Graphics graphics;
+        private static Bitmap bitmap;
 
         private static bool VertexInfo;
 
+        private static double resMultiplyer = 1.5;
+
 
         #region Load
-        public static void Load(Canvas cnvs) 
+        public static void Load(System.Windows.Controls.Image img,Grid grd)
         {
-            canvas = cnvs;
-            WHeight = canvas.ActualHeight;
-            WWidth = canvas.ActualWidth;
+            grid = grd;
+            image = img;
+            meshInfo = new TextBlock();
+            grid.Children.Add(meshInfo);
+
+            bitmap = new Bitmap((int)(img.Width * resMultiplyer), (int)(img.Height * resMultiplyer));
+            graphics = Graphics.FromImage(bitmap);
+
+            WHeight = bitmap.Height;
+            WWidth = bitmap.Width;
         }
+
+        #endregion
+
+        #region Render
+
+        public static void Render()
+        {
+            image.Source = BmToBmImage(bitmap);
+        }
+
         #endregion
 
         #region Line
-        public static void AddLine(Point p1, Point p2)
+        public static void AddLine(Face3D face)
         {
-            Line line = new Line();
-            line.X1 = p1.X + WWidth/2;
-            line.Y1 = WHeight - (p1.Y + WHeight / 2);
-            line.X2 = p2.X + WWidth / 2;
-            line.Y2 = WHeight - (p2.Y + WHeight / 2);
+            Point[] faceMesh = new Point[face.Points.Count];
 
-            line.StrokeThickness = 1;
-            line.Stroke = Brushes.Lime;
-
-            try
+            for (int i = 0; i < face.Points.Count; i++)
             {
-                canvas.Children.Add(line);
+                faceMesh[i] = (new Point((int)(face.Points[i].ProjectedLocation.X + WWidth / 2), (int)(WHeight - (face.Points[i].ProjectedLocation.Y + WHeight / 2) + 2)));
             }
-            catch { }
+
+            Pen pen = new Pen(Color.Lime);
+            pen.Width = 1;
+            graphics.DrawPolygon(pen, faceMesh);
+
         }
 
-        public static void RemoveLine(Line line) 
-        {
-            try
-            {
-                canvas.Children.Remove(line);
-            }
-            catch {}
-        }
         #endregion
 
         #region Face
 
         public static void AddFace(Face3D face)
         {
-            Polygon faceMesh = new Polygon();
+            Point[] faceMesh = new Point[face.Points.Count];
 
-            foreach (var vert in face.Points)
+            for (int i = 0; i < face.Points.Count; i++)
             {
-                faceMesh.Points.Add(new Point( vert.ProjectedLocation.X + WWidth / 2,WHeight - (vert.ProjectedLocation.Y + WHeight / 2)));
-            }
+                faceMesh[i] = (new Point((int)(face.Points[i].ProjectedLocation.X + WWidth / 2), (int)(WHeight - (face.Points[i].ProjectedLocation.Y + WHeight / 2) + 2)));
+            } 
 
-            faceMesh.StrokeThickness = 1;
-            faceMesh.Fill = face.FColor;
+            graphics.FillPolygon(face.FColor,faceMesh);
 
-
-            canvas.Children.Add(faceMesh);
         }
 
         #endregion
 
         #region Point
-        public static void AddPoint(Point3D point,int num) 
-        {
-
-            Point projected = point.ProjectedLocation;
-
-            Canvas.SetLeft(point.Body, projected.X - (point.Body.Width/2) + WWidth/2);
-            Canvas.SetBottom(point.Body, projected.Y - (point.Body.Height / 2) + WHeight/2);
-
-            try
-            {
-                canvas.Children.Add(point.Body);
-            }
-            catch { }
-            if (VertexInfo) AddVertexInfo(point,Brushes.Red);
-        }
-
-        public static void AddOriginPoint(Point3D point) 
+        public static void AddPoint(Point3D point)
         {
             Point projected = point.ProjectedLocation;
 
-            Canvas.SetLeft(point.Body, projected.X - (point.Body.Width / 2) + WWidth / 2);
-            Canvas.SetBottom(point.Body, projected.Y - (point.Body.Height / 2) + WHeight / 2);
+            int w = 3;
+            int h = 3;
+            int x = Convert.ToInt32(projected.X - (w / 2) + WWidth / 2);
+            int y = Convert.ToInt32((image.Height * resMultiplyer) - (projected.Y - (h / 2) + WHeight / 2) );
 
-            try
-            {
-                canvas.Children.Add(point.Body);
-            }
-            catch { }
-            if (VertexInfo) AddVertexInfo(point, Brushes.Green);
+            graphics.FillRectangle(Brushes.Lime, x, y, w, h);
         }
 
-        public static void RemovePoint(Rectangle point) 
-        {
-            try
-            {
-                canvas.Children.Remove(point);
-            }
-            catch {}
-        }
         #endregion
 
         #region Info
-        private static void AddVertexInfo(Point3D point, Brush color)
+        private static void AddVertexInfo(Point3D point, System.Windows.Media.Brush color)
         {
             TextBlock vertexInfo = new TextBlock();
-            
-            /*if(point.Location.X <= 0)*/vertexInfo.Text = point.IsInfoDisplayed ? $"{point.VertIndex} \n {GetVertexInfo(point)}" 
-                                                    : $"{point.VertIndex} \n";
-            if (point.Location.X <= 0) vertexInfo.Foreground = Brushes.DarkRed;
+
+            /*if(point.Location.X <= 0)*/
+            vertexInfo.Text = point.IsInfoDisplayed ? $"{point.VertIndex} \n {GetVertexInfo(point)}"
+                       : $"{point.VertIndex} \n";
+            if (point.Location.X <= 0) vertexInfo.Foreground = System.Windows.Media.Brushes.DarkRed;
             else vertexInfo.Foreground = color;
 
             Point projected = point.ProjectedLocation;
-            Canvas.SetLeft(vertexInfo, projected.X + WWidth / 2 -7);
-            Canvas.SetBottom(vertexInfo, projected.Y + WHeight / 2 -25);
+            Canvas.SetLeft(vertexInfo, projected.X + WWidth / 2 - 7);
+            Canvas.SetBottom(vertexInfo, projected.Y + WHeight / 2 - 25);
 
-            canvas.Children.Add(vertexInfo);
+            grid.Children.Add(vertexInfo);
         }
 
         private static string GetVertexInfo(Point3D point)
@@ -145,29 +134,64 @@ namespace _3D_visualizer
 
         public static void AddMeshInfo(Mesh3D mesh)
         {
-            TextBlock meshInfo = new TextBlock();
             meshInfo.Text = $"vertex count: {mesh.Vertecies.Count} \n" +
                 $"line count: {mesh.Lines.Count} \n" +
                 $"face count: {mesh.Faces.Count}";
             meshInfo.FontSize = 10;
-            meshInfo.Foreground = Brushes.Lime;
+            meshInfo.Foreground = System.Windows.Media.Brushes.Lime;
 
             Canvas.SetLeft(meshInfo, 2);
             Canvas.SetBottom(meshInfo, WHeight - 40);
-            canvas.Children.Add(meshInfo);
         }
         #endregion
 
         #region Operation
-        public static void ClearCanvas() => canvas.Children.Clear();
+
+        public static void ClearCanvas()
+        {
+            bitmap = new Bitmap(bitmap.Width, bitmap.Height);
+
+            graphics = Graphics.FromImage(bitmap);
+        }
+
+        private static BitmapImage BmToBmImage(Bitmap bm)
+        {
+            using (var memory = new MemoryStream())
+            {
+                //Saves bitmap to memory
+                bm.Save(memory, System.Drawing.Imaging.ImageFormat.Png);
+                memory.Position = 0;
+
+                //Loads Bitmap from memory and saves it as BitmapImage
+                var bmI = new BitmapImage();
+                bmI.BeginInit();
+                bmI.StreamSource = memory;
+                bmI.CacheOption = BitmapCacheOption.OnLoad;
+                bmI.EndInit();
+                bmI.Freeze();
+
+                return bmI;
+            }
+        }
+
         #endregion
 
         #region Set
-        public static void SetVertexInfo(bool vertexInfo) 
-        { 
+        public static void SetVertexInfo(bool vertexInfo)
+        {
             VertexInfo = vertexInfo;
             Logics.Refresh();
         }
         #endregion
+
+        public static void SaveImage()
+        {
+            string date = Convert.ToString(DateTime.Now);
+            date = date.Replace(':', '-');
+            date = date.Replace('/', '-');
+            date = date.Replace(' ', '_');
+            bitmap.Save($"C:\\Users\\csong\\Downloads\\{date}.png", ImageFormat.Png);
+        }
+
     }
 }

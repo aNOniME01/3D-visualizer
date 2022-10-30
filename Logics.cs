@@ -35,6 +35,7 @@ namespace _3D_visualizer
             else ScaleMesh(1);
 
             Refresh();
+            Renderer.AddMeshInfo(Mesh);
         }
         public static void Refresh()
         {
@@ -44,7 +45,7 @@ namespace _3D_visualizer
                 foreach (var face in Mesh.Faces)
                 {
                     Renderer.AddFace(face);
-                }
+                }            
             }
             if (displayVerts)
             {
@@ -52,18 +53,18 @@ namespace _3D_visualizer
                 foreach (var vertex in Mesh.Vertecies)
                 {
                     num++;
-                    Renderer.AddPoint(vertex, num);
+                    Renderer.AddPoint(vertex);
                 }
             }
             if (displayLines)
             {
-                foreach (var line in Mesh.Lines)
+                foreach (var face in Mesh.Faces)
                 {
-                    Renderer.AddLine(Mesh.Vertecies[line[0]].ProjectedLocation, Mesh.Vertecies[line[1]].ProjectedLocation);
+                    Renderer.AddLine(face);
                 }
             }
-            Renderer.AddOriginPoint(Mesh.Origin);
-            Renderer.AddMeshInfo(Mesh);
+            Renderer.AddPoint(Mesh.Origin);
+            Renderer.Render();
         }
         #endregion
 
@@ -84,6 +85,12 @@ namespace _3D_visualizer
 
             Refresh();
         }
+
+        #endregion
+
+        #region Move
+
+
 
         #endregion
 

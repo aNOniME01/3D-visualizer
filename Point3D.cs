@@ -4,9 +4,8 @@ using System.Linq;
 using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
-using System.Windows;
+using System.Drawing;
 using System.Windows.Media;
-using System.Windows.Shapes;
 
 namespace _3D_visualizer
 {
@@ -21,7 +20,6 @@ namespace _3D_visualizer
         public Vector3 QuadrantAngle { get; private set; }
         public Vector3 Rotation { get; private set; }
 
-        public Rectangle Body { get; private set; }
         public bool IsInfoDisplayed { get; private set; }
 
         private Camera MainCam;
@@ -42,11 +40,6 @@ namespace _3D_visualizer
             QuadrantAngle = CalculateQuadrantAngle(origin);
             Rotation = new Vector3(QuadrantAngle.X, QuadrantAngle.Y, QuadrantAngle.Z);
 
-            Body = new Rectangle();
-            Body.Height = 3;
-            Body.Width = 3;
-            Body.Fill = Brushes.LimeGreen;
-
             IsInfoDisplayed = false;
             MainCam = mainCam;
         }
@@ -62,11 +55,6 @@ namespace _3D_visualizer
 
             QuadrantAngle = new Vector3(0, 0, 0);
             Rotation = new Vector3(0, 0, 0);
-
-            Body = new Rectangle();
-            Body.Height = 3;
-            Body.Width = 3;
-            Body.Fill = Brushes.Red;
 
             IsInfoDisplayed = false;
         }
@@ -109,6 +97,36 @@ namespace _3D_visualizer
                 Y = Z* -1;
                 Z = hlpr* -1;
             }
+
+            Location = new Vector3(X, Y, Z);
+            ProjectTo2D();
+        }
+
+        public void ChangeXRotation2(Point3D origin)
+        {
+            float rX = origin.Rotation.X;
+            if (QuadrantAngle.X == 90 || QuadrantAngle.X == 270) rX *= -1;
+            Rotation = new Vector3(rX, Rotation.Y, Rotation.Z);
+
+            float disY, disZ;
+            disY = DistanceBetween(origin.Location.Y, Location.Y);
+            disZ = DistanceBetween(origin.Location.Z, Location.Z);
+
+            float sinX, cosX;
+            sinX = (float)Math.Sin(AngleToRadians(Rotation.X));
+            cosX = (float)Math.Cos(AngleToRadians(Rotation.X));
+
+            float X, Y, Z;
+            X = Location.X;
+            Y = disY * cosX - disZ * sinX;
+            Z = disZ * cosX + disY * sinX;
+
+            //if (QuadrantAngle.X == 90 || QuadrantAngle.X == 270)
+            //{
+            //    float hlpr = Y;
+            //    Y = Z* -1;
+            //    Z = hlpr* -1;
+            //}
 
             Location = new Vector3(X, Y, Z);
             ProjectTo2D();
@@ -198,12 +216,12 @@ namespace _3D_visualizer
                 float zHlpr = Location.Z * F;
                 if (zHlpr < float.MaxValue && zHlpr > float.MinValue) Z = zHlpr;
 
-                ProjectedLocation = new Point(Y, Z);
+                ProjectedLocation = new Point((int)Y, (int)Z);
 
             }
             else
             {
-                ProjectedLocation = new Point(Location.Y, Location.Z);
+                ProjectedLocation = new Point((int)Location.Y, (int)Location.Z);
             }
         }
 
