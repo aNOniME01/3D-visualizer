@@ -26,7 +26,7 @@
             </StackPanel>
             
             <StackPanel Orientation="Horizontal">
-                <CheckBox x:Name="infoDisplay" Checked="CheckBox_Checked"  Unchecked="CheckBox_Unchecked_1"/>
+                <CheckBox IsEnabled="False" x:Name="infoDisplay" Checked="CheckBox_Checked"  Unchecked="CheckBox_Unchecked_1"/>
                 <TextBlock Text="show vertex info" Margin="10,0,0,10"/>
             </StackPanel>
             
