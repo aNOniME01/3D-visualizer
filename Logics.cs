@@ -28,7 +28,7 @@ namespace _3D_visualizer
             else ScaleMesh(1);
 
             Refresh();
-            //Renderer.AddMeshInfo(Mesh);
+            Renderer.AddMeshInfo(Mesh);
         }
         
         public static void Refresh()

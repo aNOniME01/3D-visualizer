@@ -31,8 +31,7 @@ namespace _3D_visualizer
         {
             grid = grd;
             image = img;
-            meshInfo = new TextBlock();
-            grid.Children.Add(meshInfo);
+            meshInfo = grid.Children[1] as TextBlock;
 
             bitmap = new Bitmap((int)(img.Width * resMultiplyer), (int)(img.Height * resMultiplyer));
             graphics = Graphics.FromImage(bitmap);
@@ -145,8 +144,6 @@ namespace _3D_visualizer
             meshInfo.Text = $"vertex count: {mesh.Vertecies.Count} \n" +
                 $"line count: {mesh.Lines.Count} \n" +
                 $"face count: {mesh.Faces.Count}";
-            meshInfo.FontSize = 10;
-            meshInfo.Foreground = System.Windows.Media.Brushes.Lime;
 
             Canvas.SetLeft(meshInfo, 2);
             Canvas.SetBottom(meshInfo, WHeight - 40);

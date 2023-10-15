@@ -13,6 +13,7 @@
         </Grid.ColumnDefinitions>
         <Grid x:Name="grd" Grid.Column="0" Background="Black">
             <Image x:Name="disp"/>
+            <TextBlock x:Name="MeshInfo" FontSize="10" Foreground="Lime"/>
         </Grid>
         
         <StackPanel Grid.Column="1">
