@@ -1,16 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Controls;
 using System.Windows.Media.Imaging;
-using System.Windows.Media.Media3D;
-using System.Windows.Shapes;
+using _3D_visualizer.Objects;
 
 namespace _3D_visualizer
 {
@@ -66,6 +60,20 @@ namespace _3D_visualizer
             for (int i = 0; i < face.Points.Count; i++)
             {
                 faceMesh[i] = (new Point((int)(face.Points[i].ProjectedLocation.X + WWidth / 2), (int)(WHeight - (face.Points[i].ProjectedLocation.Y + WHeight / 2) + 2)));
+            }
+
+            Pen pen = new Pen(Color.Lime);
+            pen.Width = 1;
+            graphics.DrawPolygon(pen, faceMesh);
+
+        }
+        public static void AddLine(Point3D[] points)
+        {
+            Point[] faceMesh = new Point[points.Length];
+
+            for (int i = 0; i < points.Length; i++)
+            {
+                faceMesh[i] = (new Point((int)(points[i].ProjectedLocation.X + WWidth / 2), (int)(WHeight - (points[i].ProjectedLocation.Y + WHeight / 2) + 2)));
             }
 
             Pen pen = new Pen(Color.Lime);

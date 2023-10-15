@@ -2,19 +2,11 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Numerics;
-using System.Text;
-using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 using System.Windows.Threading;
+using _3D_visualizer.Objects;
 
 namespace _3D_visualizer
 {
@@ -23,7 +15,7 @@ namespace _3D_visualizer
     /// </summary>
     public partial class MainWindow : Window
     {
-        private static string loc = "test.txt";
+        private static string loc = $"{GetModelPath()}test.txt";
         private static DispatcherTimer spinUpdate;
 
         public MainWindow()
@@ -40,7 +32,7 @@ namespace _3D_visualizer
             spinUpdate.Tick += spin_Tick;
 
             //load obj selector
-            DirectoryInfo dirInfo = new DirectoryInfo(System.IO.Path.GetFullPath("."));
+            DirectoryInfo dirInfo = new DirectoryInfo(GetModelPath());
             FileInfo[] files = dirInfo.GetFiles("*.*", SearchOption.AllDirectories);
 
             foreach (FileInfo file in files)
@@ -64,7 +56,7 @@ namespace _3D_visualizer
 
                     ComboBoxItem item = new ComboBoxItem();
                     item.Content = objectName;
-                    item.Tag = file.Name;
+                    item.Tag = file.FullName;
 
                     objSelector.Items.Add(item);
                 }
@@ -144,7 +136,7 @@ namespace _3D_visualizer
 
         private void StartVisualizer()
         {
-            Logics.Load(loc);
+            Logics.LoadModel(loc);
 
             vertexDisplay.IsChecked = false;
             infoDisplay.IsChecked = false;
@@ -271,6 +263,24 @@ namespace _3D_visualizer
         #endregion
 
         #region Operations
+
+        public static string GetModelPath()
+        {
+            string transferFileLoc = ".";
+
+            transferFileLoc = System.IO.Path.GetFullPath(transferFileLoc);
+
+            string[] hlpr = transferFileLoc.Split('\\');
+            transferFileLoc = "";
+            for (int i = 0; i < hlpr.Length - 4; i++)
+            {
+                transferFileLoc += hlpr[i];
+                transferFileLoc += "\\";
+            }
+            return transferFileLoc + "\\3D-visualizer\\Models\\";
+
+        }
+
 
         private void SortByDistance(ref List<Point3D> vertecies)
         {

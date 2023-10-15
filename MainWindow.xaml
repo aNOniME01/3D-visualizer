@@ -45,7 +45,7 @@
             </StackPanel>
             
             <TextBlock Text="X Rotation" HorizontalAlignment="Center"/>
-            <Slider x:Name="RotXSlider" Minimum="0" Maximum="360" TickFrequency="1" IsSnapToTickEnabled="True" Value="0" ValueChanged="RotXSlider_ValueChanged"/>
+            <Slider IsEnabled="False" x:Name="RotXSlider" Minimum="0" Maximum="360" TickFrequency="1" IsSnapToTickEnabled="True" Value="0" ValueChanged="RotXSlider_ValueChanged"/>
             <TextBlock Text="0" x:Name="Xrot" HorizontalAlignment="Center"/>
             
             <TextBlock Text="Y Rotation" HorizontalAlignment="Center"/>

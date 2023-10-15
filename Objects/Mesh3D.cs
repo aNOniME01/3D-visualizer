@@ -3,13 +3,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Media;
-using System.Windows.Shapes;
 
-namespace _3D_visualizer
+namespace _3D_visualizer.Objects
 {
     internal class Mesh3D
     {
@@ -24,7 +19,7 @@ namespace _3D_visualizer
 
         #region Constructor
 
-        public Mesh3D(string loc,Camera mainCam)
+        public Mesh3D(string loc, Camera mainCam)
         {
             Vertecies = new List<Point3D>();
             Lines = new List<int[]>();
@@ -36,16 +31,16 @@ namespace _3D_visualizer
 
             if (loc.Split('.').Last() == "obj")
             {
-                ReadInFromObj(loc,mainCam);
+                ReadInFromObj(loc, mainCam);
             }
             else
             {
-                ReadInFromTxt(loc,mainCam);
+                ReadInFromTxt(loc, mainCam);
             }
 
             OrderByX();
         }
-        private void ReadInFromObj(string loc,Camera mainCam)
+        private void ReadInFromObj(string loc, Camera mainCam)
         {
             StreamReader sr = File.OpenText(loc);
 
@@ -55,7 +50,7 @@ namespace _3D_visualizer
             {
                 string[] hlpr = sr.ReadLine().Trim().Split(' ');
 
-                Origin = new Point3D(0, 0, 0,mainCam);
+                Origin = new Point3D(0, 0, 0, mainCam);
                 if (hlpr[0] != "")
                 {
                     if (hlpr[0] == "v")
@@ -70,13 +65,13 @@ namespace _3D_visualizer
                             if (hlpr[i] != "")
                             {
                                 X = (float)Convert.ToDouble(hlpr[i]);
-                                Y = (float)Convert.ToDouble(hlpr[i+1]);
-                                Z = (float)Convert.ToDouble(hlpr[i+2]);
+                                Y = (float)Convert.ToDouble(hlpr[i + 1]);
+                                Z = (float)Convert.ToDouble(hlpr[i + 2]);
                                 isStay = false;
                             }
                             i++;
                         }
-                        Vertecies.Add(new Point3D(Z, X, Y, Origin,index,mainCam));
+                        Vertecies.Add(new Point3D(Z, X, Y, Origin, index, mainCam));
                         index++;
                     }
                     else if (hlpr[0] == "f")
@@ -109,7 +104,7 @@ namespace _3D_visualizer
                     }
                     else if (hlpr[0] == "l")
                     {
-                        Lines.Add( new int[2] {  Convert.ToInt32(hlpr[1]) - 1, Convert.ToInt32(hlpr[2]) - 1 });
+                        Lines.Add(new int[2] { Convert.ToInt32(hlpr[1]) - 1, Convert.ToInt32(hlpr[2]) - 1 });
                     }
                     else if (hlpr[0] == "vn")
                     {
@@ -118,7 +113,7 @@ namespace _3D_visualizer
                 }
             }
         }
-        private void ReadInFromTxt(string loc,Camera mainCam)
+        private void ReadInFromTxt(string loc, Camera mainCam)
         {
             StreamReader sr = File.OpenText(loc);
 
@@ -137,7 +132,7 @@ namespace _3D_visualizer
                     else if (hlpr[0][0] == 'P')
                     {
                         hlpr[0] = hlpr[0].Trim('P');
-                        Vertecies.Add(new Point3D(Convert.ToInt32(hlpr[0]), Convert.ToInt32(hlpr[1]), Convert.ToInt32(hlpr[2]), Origin,index, mainCam));
+                        Vertecies.Add(new Point3D(Convert.ToInt32(hlpr[0]), Convert.ToInt32(hlpr[1]), Convert.ToInt32(hlpr[2]), Origin, index, mainCam));
                         index++;
                     }
                     else if (hlpr[0][0] == 'L')
@@ -147,6 +142,7 @@ namespace _3D_visualizer
                     }
                 }
             }
+            sr.Close();
 
         }
         #endregion
@@ -156,7 +152,7 @@ namespace _3D_visualizer
         {
             foreach (var item in Lines)
             {
-                if ((item[0] == line[0] && item[1] == line[1]) || (item[0] == line[1] && item[1] == line[0])) return true;
+                if (item[0] == line[0] && item[1] == line[1] || item[0] == line[1] && item[1] == line[0]) return true;
             }
             return false;
         }
@@ -180,30 +176,30 @@ namespace _3D_visualizer
 
             foreach (var vertex in Vertecies)
             {
-                if(X != 0) vertex.ChangeXRotation(Origin);
-                if(Y != 0) vertex.ChangeYRotation(Origin);
-                if(Z != 0) vertex.ChangeZRotation(Origin);
+                if (X != 0) vertex.ChangeXRotation(Origin);
+                if (Y != 0) vertex.ChangeYRotation(Origin);
+                if (Z != 0) vertex.ChangeZRotation(Origin);
             }
 
         }
 
         public void RotateX(float degree)
         {
-            Origin.SetRotation(new Vector3(degree,Origin.Rotation.Y, Origin.Rotation.Z));
+            Origin.SetRotation(new Vector3(degree, Origin.Rotation.Y, Origin.Rotation.Z));
 
-            //ScaleMesh();
+            ScaleMesh();
 
             foreach (var vertex in Vertecies)
             {
                 vertex.ChangeXRotation2(Origin);
             }
 
-            //OrderByX();
+            OrderByX();
         }
 
         public void RotateY(float degree)
         {
-            Origin.SetRotation(new Vector3(Origin.Rotation.X,degree, Origin.Rotation.Z));
+            Origin.SetRotation(new Vector3(Origin.Rotation.X, degree, Origin.Rotation.Z));
 
             ScaleMesh();
 
@@ -217,7 +213,7 @@ namespace _3D_visualizer
 
         public void RotateZ(float degree)
         {
-            Origin.SetRotation(new Vector3(Origin.Rotation.X,Origin.Rotation.Y, degree));
+            Origin.SetRotation(new Vector3(Origin.Rotation.X, Origin.Rotation.Y, degree));
 
             ScaleMesh();
 
@@ -250,18 +246,18 @@ namespace _3D_visualizer
                 float zDistance = Point3D.DistanceBetween(Origin.Location.Z, vert.DefLocation.Z);
                 float xScale, yScale, zScale;
 
-                if (vert.DefLocation.X < Origin.Location.X) xScale = -(xDistance * Scale.X-xDistance);
-                else xScale = (xDistance * Scale.X-xDistance);
+                if (vert.DefLocation.X < Origin.Location.X) xScale = -(xDistance * Scale.X - xDistance);
+                else xScale = xDistance * Scale.X - xDistance;
 
-                if (vert.DefLocation.Y < Origin.Location.Y) yScale = -(yDistance * Scale.Y-yDistance);
-                else yScale = (yDistance * Scale.Y-yDistance);
+                if (vert.DefLocation.Y < Origin.Location.Y) yScale = -(yDistance * Scale.Y - yDistance);
+                else yScale = yDistance * Scale.Y - yDistance;
 
-                if (vert.DefLocation.Z < Origin.Location.Z) zScale = -(zDistance * Scale.Z-zDistance);
-                else zScale = (zDistance * Scale.Z-zDistance);
+                if (vert.DefLocation.Z < Origin.Location.Z) zScale = -(zDistance * Scale.Z - zDistance);
+                else zScale = zDistance * Scale.Z - zDistance;
 
-                xScale = (vert.Location.X - (vert.DefLocation.X + xScale))* -1;
-                yScale = (vert.Location.Y - (vert.DefLocation.Y + yScale))* -1;
-                zScale = (vert.Location.Z - (vert.DefLocation.Z + zScale))* -1;
+                xScale = (vert.Location.X - (vert.DefLocation.X + xScale)) * -1;
+                yScale = (vert.Location.Y - (vert.DefLocation.Y + yScale)) * -1;
+                zScale = (vert.Location.Z - (vert.DefLocation.Z + zScale)) * -1;
 
                 Vertecies[i].ChangeLocation(new Vector3(Vertecies[i].Location.X + xScale, Vertecies[i].Location.Y + yScale, Vertecies[i].Location.Z + zScale));
             }

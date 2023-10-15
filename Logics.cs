@@ -1,12 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Media;
-using System.Windows.Shapes;
+﻿using System.Linq;
+using _3D_visualizer.Objects;
 
 namespace _3D_visualizer
 {
@@ -21,7 +14,7 @@ namespace _3D_visualizer
 
 
         #region Logic
-        public static void Load(string loc)
+        public static void LoadModel(string loc)
         {
             displayVerts = false;
             displayLines = true;
@@ -35,8 +28,9 @@ namespace _3D_visualizer
             else ScaleMesh(1);
 
             Refresh();
-            Renderer.AddMeshInfo(Mesh);
+            //Renderer.AddMeshInfo(Mesh);
         }
+        
         public static void Refresh()
         {
             Renderer.ClearCanvas();
@@ -58,10 +52,13 @@ namespace _3D_visualizer
             }
             if (displayLines)
             {
-                foreach (var face in Mesh.Faces)
+                if (Mesh.Faces.Count == 0)
                 {
-                    Renderer.AddLine(face);
+                    foreach (var line in Mesh.Lines) Renderer.AddLine(new Point3D[] { Mesh.Vertecies[line[0]], Mesh.Vertecies[line[1]] });
                 }
+                else foreach (var face in Mesh.Faces) Renderer.AddLine(face);
+                
+
             }
             Renderer.AddPoint(Mesh.Origin);
             Renderer.Render();
