@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Numerics;
@@ -64,9 +65,9 @@ namespace _3D_visualizer.Objects
                         {
                             if (hlpr[i] != "")
                             {
-                                X = (float)Convert.ToDouble(hlpr[i]);
-                                Y = (float)Convert.ToDouble(hlpr[i + 1]);
-                                Z = (float)Convert.ToDouble(hlpr[i + 2]);
+                                X = float.Parse(hlpr[i],CultureInfo.InvariantCulture);
+                                Y = float.Parse(hlpr[i + 1],CultureInfo.InvariantCulture);
+                                Z = float.Parse(hlpr[i + 2], CultureInfo.InvariantCulture);
                                 isStay = false;
                             }
                             i++;
@@ -108,7 +109,7 @@ namespace _3D_visualizer.Objects
                     }
                     else if (hlpr[0] == "vn")
                     {
-                        FaceNormals.Add(new Vector3((float)Convert.ToDouble(hlpr[1]), (float)Convert.ToDouble(hlpr[2]), (float)Convert.ToDouble(hlpr[3])));
+                        FaceNormals.Add(new Vector3(float.Parse(hlpr[1], CultureInfo.InvariantCulture), float.Parse(hlpr[2], CultureInfo.InvariantCulture), float.Parse(hlpr[3], CultureInfo.InvariantCulture)));
                     }
                 }
             }
